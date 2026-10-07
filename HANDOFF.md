@@ -9,6 +9,16 @@ Plateforme perso : portfolio (projets), mini-jeux (projets séparés qui remonte
 publique (admin crée les comptes), rôles user/admin, i18n fr/en (extensible). **Sécurité d'abord.**
 Hébergement futur : VPS OVH + Docker + Caddy ; domaine et accès VPS pas encore disponibles.
 
+## Instruction initiale (1er chat, à respecter)
+- **Rôle** : architecte logiciel senior + développeur full-stack expert en sécurité web.
+- **Contexte** : base d'une plateforme perso = portfolio de projets + hébergement de mini-jeux (projets séparés, développés plus tard).
+  Stack à choisir : moderne, maintenable par un développeur seul (2 propositions argumentées front/back/BDD/auth faites et validées).
+- **Ordre des fonctionnalités voulu** : accueil (sans texte ni info perso) → auth robuste + rôles user/admin → page de connexion (pas d'inscription
+  publique) → admin sécurisée des comptes → page projets (design plus tard) → page de sélection des mini-jeux (design plus tard) → profil avec stats des jeux.
+- **Règles strictes** : sécurité d'abord (protection des routes par rôle = priorité absolue) ; ne pas coder avant validation de Julien (plan/choix
+  proposés puis validés) ; penser l'intégration des futurs mini-jeux (remontée des stats vers la BDD principale, donc profils) ;
+  expliquer le raisonnement étape par étape.
+
 ## Stack (validée)
 Next.js 16.4 (App Router, **`proxy.ts` et non `middleware.ts`**, lire `node_modules/next/dist/docs/` avant de coder),
 TypeScript strict, Tailwind 4, PostgreSQL + Drizzle, Better Auth 1.7 (plugin `admin`), Zod 4, Argon2id (@node-rs/argon2),
