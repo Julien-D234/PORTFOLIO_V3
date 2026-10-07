@@ -1,7 +1,7 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : blocs A, B, invitations, C et D FAITS.
-Prochain bloc : **E (clôture : smoke curl, revue sécurité)**.
+Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : ÉTAPE 4 TERMINÉE (blocs A à E, CI verte).
+Prochaine étape : **5 (Projets)** — proposer le plan à Julien et le faire valider avant de coder.
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -67,8 +67,12 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
      `LAST_ADMIN` conservé en défense en profondeur (pratiquement atteint via SELF_ACTION). Erreur traduite (`admin.actions.errors.selfAction`).
      `tests/access-matrix.test.ts` : test structurel (chaque page/layout admin appelle `requireAdmin`, chaque route `api/admin` appelle `requireApi("admin")` avant la DB
      + `isSameOrigin` sur POST) + matrice `authorize` anonyme/user/admin. La matrice HTTP réelle reste à faire en smoke curl (bloc E). Les actions refusées ne sont pas auditées.
-   - **E. À FAIRE** clôture : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection recherche, fuite de
-     données), HANDOFF, un commit par bloc, push, suivi CI.
+   - **E. FAIT** smoke curl sur build de prod (PGlite) : anonyme → 307 vers login (pages) / 401 (API) ; POST sans Origin ou Origin étrangère → 403 ;
+     sign-up public → 400 ; user → 404 sur toutes les pages admin, 403 sur les API admin (dont `/api/auth/admin/*`) ; admin → 200 partout ; fiche/id piégé → 404 ;
+     recherche `%`/`' OR 1=1--` inoffensive ; aucun hash/jeton dans les pages ; lien d'invitation : mdp trop court → `PASSWORD_POLICY`, rejeu → `INVALID_LINK` ;
+     impersonation 403 ; auto ban/suppression/rétrogradation → `SELF_ACTION` ; ban → session du banni coupée immédiatement ; en-têtes (CSP à nonce, HSTS, XFO, no-store) présents.
+     Revue : pas d'IDOR (toutes les routes `[id]` derrière requireAdmin/requireApi, id en requête paramétrée) ; points connus non bloquants : IP lue dans
+     `X-Forwarded-For` (OK seulement derrière Caddy), actions refusées non auditées.
    - Futur : envoi du lien par e-mail quand domaine/SMTP existeront.
 5. **Projets** : `project` + `project_translation` (fr/en), page publique + gestion admin.
 6. **Mini-jeux** : `game`, `game_session`, `game_stat` (JSONB), page de sélection, JWT court (10 min) userId+gameId,
