@@ -83,8 +83,20 @@ npm run db:migrate && npm run create-admin -- --email x@y.z --name "Nom"
 ```
 Variables : voir `.env.example` (DATABASE_URL, BETTER_AUTH_SECRET ≥ 32 car., BETTER_AUTH_URL).
 
+## Smoke test local (sans Docker)
+```
+PORT=5544 npm run dev:db                      # terminal background
+export DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5544/postgres BETTER_AUTH_SECRET=<32+ car.> BETTER_AUTH_URL=http://localhost:3100
+npm run db:migrate && ADMIN_PASSWORD=<mdp> npm run create-admin -- --email a@b.dev --name X
+npm run build && DB_POOL_MAX=1 npx next start -p 3100   # terminal background (exec, sinon le PID du wrapper diffère)
+```
+Puis curl avec `-H "origin: http://localhost:3100"` sur les POST `/api/auth/*` (cookie jar `-c/-b`). Arrêter les serveurs en
+tuant les PID relevés avec `ps -eo pid,args | grep "[n]ext-server"` (jamais `pkill -f`/`pgrep -f` dans la même commande).
+Les commandes `curl | python3` déclenchent une demande d'approbation : écrire la réponse dans un fichier puis la lire.
+
 ## Git / GitHub
-Push sur `main` (pas de `develop` pour l'instant). Le token GitHub fine-grained (Contents, Workflows, Actions : lecture/écriture)
+Push sur `main` (pas de `develop` pour l'instant). Identité git non configurée : committer avec
+`git -c user.name=Julien-D234 -c user.email=Julien-D234@users.noreply.github.com commit …`. Le token GitHub fine-grained (Contents, Workflows, Actions : lecture/écriture)
 est dans la variable d'environnement **`GITHUB_PORTFOLIOV3_RHETORIC`** (fichier `/opt/data/.env`, chargée au démarrage de la session).
 Ne jamais afficher sa valeur ni l'écrire dans la config git, un fichier ou l'URL du remote. Pousser ainsi :
 ```
