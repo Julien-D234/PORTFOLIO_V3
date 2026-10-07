@@ -60,7 +60,13 @@ npm run db:migrate && npm run create-admin -- --email x@y.z --name "Nom"
 Variables : voir `.env.example` (DATABASE_URL, BETTER_AUTH_SECRET ≥ 32 car., BETTER_AUTH_URL).
 
 ## Git / GitHub
-Push sur `main` (pas de `develop` pour l'instant). Token GitHub fine-grained fourni par Julien par session (Contents, Workflows,
-Actions : lecture/écriture), à passer via `git -c http.extraheader="Authorization: Basic <base64(x-access-token:TOKEN)>" push`.
-Ne jamais l'écrire dans la config git, un fichier ou l'URL du remote ; masquer les traces dans l'historique du shell.
-Suivre la CI après chaque push (API Actions) : le job `docker` a déjà révélé des erreurs invisibles en local.
+Push sur `main` (pas de `develop` pour l'instant). Le token GitHub fine-grained (Contents, Workflows, Actions : lecture/écriture)
+est dans la variable d'environnement **`GITHUB_PORTFOLIOV3_RHETORIC`** (fichier `/opt/data/.env`, chargée au démarrage de la session).
+Ne jamais afficher sa valeur ni l'écrire dans la config git, un fichier ou l'URL du remote. Pousser ainsi :
+```
+B=$(printf 'x-access-token:%s' "$GITHUB_PORTFOLIOV3_RHETORIC" | base64 -w0)
+git -c http.extraheader="Authorization: Basic $B" push
+```
+Si la variable est absente de l'environnement, la lire sans l'afficher depuis `/opt/data/.env`. Si le token a expiré ou été révoqué,
+demander à Julien d'en créer un nouveau et de remplacer la ligne dans `.env`. Suivre la CI après chaque push (API Actions) :
+le job `docker` a déjà révélé des erreurs invisibles en local.
