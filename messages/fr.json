@@ -35,5 +35,91 @@
       }
     },
     "signOut": "Se déconnecter"
+  },
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "users": "Utilisateurs",
+      "audit": "Journal d'audit",
+      "back": "Retour"
+    },
+    "dashboard": {
+      "users": "Comptes",
+      "usersCount": "{n} comptes",
+      "auditLink": "Dernières actions"
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "search": "Rechercher (e-mail ou nom)",
+      "searchSubmit": "Rechercher",
+      "empty": "Aucun utilisateur.",
+      "cols": {
+        "email": "E-mail",
+        "name": "Nom",
+        "role": "Rôle",
+        "status": "Statut",
+        "created": "Créé le"
+      },
+      "roles": {
+        "user": "Utilisateur",
+        "admin": "Administrateur"
+      },
+      "status": {
+        "active": "Actif",
+        "banned": "Banni",
+        "locked": "Verrouillé"
+      },
+      "mustChange": "Mot de passe à changer",
+      "details": "Détails",
+      "total": "{n} résultat(s)"
+    },
+    "detail": {
+      "title": "Compte",
+      "id": "Identifiant",
+      "email": "E-mail",
+      "name": "Nom",
+      "role": "Rôle",
+      "status": "Statut",
+      "locale": "Langue",
+      "created": "Créé le",
+      "banReason": "Motif du ban",
+      "banExpires": "Fin du ban",
+      "failed": "Échecs de connexion",
+      "lockedUntil": "Verrouillé jusqu'au",
+      "sessions": "Sessions actives",
+      "noSessions": "Aucune session active.",
+      "sessionCols": {
+        "created": "Ouverte le",
+        "expires": "Expire le",
+        "ip": "IP",
+        "agent": "Navigateur"
+      },
+      "auditLink": "Voir l'historique de ce compte",
+      "never": "jamais",
+      "permanent": "définitif"
+    },
+    "audit": {
+      "title": "Journal d'audit",
+      "empty": "Aucune entrée.",
+      "filterAction": "Action",
+      "allActions": "Toutes les actions",
+      "filter": "Filtrer",
+      "cols": {
+        "date": "Date",
+        "actor": "Auteur",
+        "action": "Action",
+        "target": "Cible",
+        "ip": "IP",
+        "details": "Détails"
+      },
+      "system": "système",
+      "deleted": "(supprimé)"
+    },
+    "pagination": {
+      "prev": "Précédent",
+      "next": "Suivant",
+      "page": "Page {page} sur {count}"
+    }
   }
 }

@@ -35,5 +35,91 @@
       }
     },
     "signOut": "Sign out"
+  },
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "audit": "Audit log",
+      "back": "Back"
+    },
+    "dashboard": {
+      "users": "Accounts",
+      "usersCount": "{n} accounts",
+      "auditLink": "Latest actions"
+    },
+    "users": {
+      "title": "Users",
+      "search": "Search (email or name)",
+      "searchSubmit": "Search",
+      "empty": "No users.",
+      "cols": {
+        "email": "Email",
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "created": "Created"
+      },
+      "roles": {
+        "user": "User",
+        "admin": "Administrator"
+      },
+      "status": {
+        "active": "Active",
+        "banned": "Banned",
+        "locked": "Locked"
+      },
+      "mustChange": "Password change required",
+      "details": "Details",
+      "total": "{n} result(s)"
+    },
+    "detail": {
+      "title": "Account",
+      "id": "ID",
+      "email": "Email",
+      "name": "Name",
+      "role": "Role",
+      "status": "Status",
+      "locale": "Language",
+      "created": "Created",
+      "banReason": "Ban reason",
+      "banExpires": "Ban ends",
+      "failed": "Failed sign-ins",
+      "lockedUntil": "Locked until",
+      "sessions": "Active sessions",
+      "noSessions": "No active session.",
+      "sessionCols": {
+        "created": "Started",
+        "expires": "Expires",
+        "ip": "IP",
+        "agent": "Browser"
+      },
+      "auditLink": "View this account's history",
+      "never": "never",
+      "permanent": "permanent"
+    },
+    "audit": {
+      "title": "Audit log",
+      "empty": "No entries.",
+      "filterAction": "Action",
+      "allActions": "All actions",
+      "filter": "Filter",
+      "cols": {
+        "date": "Date",
+        "actor": "Actor",
+        "action": "Action",
+        "target": "Target",
+        "ip": "IP",
+        "details": "Details"
+      },
+      "system": "system",
+      "deleted": "(deleted)"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {count}"
+    }
   }
 }
