@@ -154,6 +154,61 @@
         "rateLimited": "Trop de demandes. Réessayez dans une minute.",
         "network": "Une erreur est survenue. Réessayez plus tard."
       }
+    },
+    "actions": {
+      "title": "Actions",
+      "role": {
+        "title": "Rôle",
+        "makeAdmin": "Promouvoir administrateur",
+        "makeUser": "Retirer le rôle administrateur",
+        "confirmAdmin": "Donner les droits d'administration à ce compte ?",
+        "confirmUser": "Retirer les droits d'administration à ce compte ?"
+      },
+      "ban": {
+        "title": "Bannir le compte",
+        "reason": "Motif (optionnel)",
+        "duration": "Durée",
+        "durations": {
+          "permanent": "Définitif",
+          "h1": "1 heure",
+          "d1": "1 jour",
+          "d7": "7 jours",
+          "d30": "30 jours"
+        },
+        "submit": "Bannir",
+        "confirm": "Bannir ce compte ? Ses sessions seront révoquées immédiatement."
+      },
+      "unban": {
+        "button": "Débannir",
+        "confirm": "Débannir ce compte ?"
+      },
+      "unlock": {
+        "button": "Déverrouiller",
+        "confirm": "Lever le verrouillage de ce compte ?"
+      },
+      "revoke": {
+        "button": "Révoquer les sessions",
+        "confirm": "Déconnecter ce compte de tous ses appareils ?"
+      },
+      "remove": {
+        "title": "Supprimer le compte",
+        "hint": "Irréversible. Pour confirmer, retapez l'e-mail :",
+        "placeholder": "E-mail du compte",
+        "submit": "Supprimer définitivement",
+        "confirm": "Supprimer définitivement ce compte et ses données ?"
+      },
+      "done": "Action effectuée.",
+      "pending": "En cours…",
+      "errors": {
+        "lastAdmin": "Impossible : ce serait le dernier administrateur actif.",
+        "passwordPolicy": "Mot de passe non conforme.",
+        "forbidden": "Action non autorisée.",
+        "unauthenticated": "Session expirée. Reconnectez-vous.",
+        "rateLimited": "Trop de demandes. Réessayez dans une minute.",
+        "notFound": "Compte introuvable.",
+        "network": "Une erreur est survenue. Réessayez plus tard."
+      },
+      "self": "C'est votre propre compte : vous ne pouvez pas le bannir, le supprimer ni modifier votre rôle."
     }
   },
   "welcome": {

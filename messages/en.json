@@ -154,6 +154,61 @@
         "rateLimited": "Too many requests. Try again in a minute.",
         "network": "Something went wrong. Try again later."
       }
+    },
+    "actions": {
+      "title": "Actions",
+      "role": {
+        "title": "Role",
+        "makeAdmin": "Promote to administrator",
+        "makeUser": "Remove administrator role",
+        "confirmAdmin": "Grant administrator rights to this account?",
+        "confirmUser": "Remove administrator rights from this account?"
+      },
+      "ban": {
+        "title": "Ban account",
+        "reason": "Reason (optional)",
+        "duration": "Duration",
+        "durations": {
+          "permanent": "Permanent",
+          "h1": "1 hour",
+          "d1": "1 day",
+          "d7": "7 days",
+          "d30": "30 days"
+        },
+        "submit": "Ban",
+        "confirm": "Ban this account? Its sessions will be revoked immediately."
+      },
+      "unban": {
+        "button": "Unban",
+        "confirm": "Unban this account?"
+      },
+      "unlock": {
+        "button": "Unlock",
+        "confirm": "Lift the lock on this account?"
+      },
+      "revoke": {
+        "button": "Revoke sessions",
+        "confirm": "Sign this account out of all devices?"
+      },
+      "remove": {
+        "title": "Delete account",
+        "hint": "Irreversible. To confirm, retype the e-mail:",
+        "placeholder": "Account e-mail",
+        "submit": "Delete permanently",
+        "confirm": "Permanently delete this account and its data?"
+      },
+      "done": "Done.",
+      "pending": "Working…",
+      "errors": {
+        "lastAdmin": "Not possible: this would remove the last active administrator.",
+        "passwordPolicy": "Password does not meet the policy.",
+        "forbidden": "Action not allowed.",
+        "unauthenticated": "Session expired. Please sign in again.",
+        "rateLimited": "Too many requests. Try again in a minute.",
+        "notFound": "Account not found.",
+        "network": "Something went wrong. Try again later."
+      },
+      "self": "This is your own account: you cannot ban it, delete it or change its role."
     }
   },
   "welcome": {

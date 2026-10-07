@@ -6,17 +6,18 @@ import { requireAdmin } from "@/server/guards";
 import { getDb } from "@/server/db";
 import { getUser } from "@/server/admin/queries";
 import { fmtDate } from "@/lib/format";
+import { UserActions } from "@/components/admin/user-actions";
 import { RegenerateInviteButton } from "@/components/admin/regenerate-invite-button";
 
-// Les actions (rôle, ban, sessions, suppression…) arrivent au bloc C.
 export default async function AdminUserDetail({ params }: PageProps<"/[lang]/admin/users/[id]">) {
   const { lang, id } = await params;
   if (!isLocale(lang)) notFound();
-  await requireAdmin({ locale: lang });
+  const me = await requireAdmin({ locale: lang });
   const data = await getUser(getDb(), id);
   if (!data) notFound();
   const { user: u, sessions } = data;
   const dict = await getDictionary(lang);
+  const isSelf = me.id === u.id;
   const d = dict.admin.detail;
   const t = dict.admin.users;
 
@@ -59,6 +60,9 @@ export default async function AdminUserDetail({ params }: PageProps<"/[lang]/adm
           </table>
         )}
       </section>
+      {isSelf ? <p className="text-sm">{dict.admin.actions.self}</p> : (
+        <UserActions userId={u.id} email={u.email} isAdmin={u.role === "admin"} banned={u.banned} locked={u.status === "locked"} lang={lang} labels={dict.admin.actions} />
+      )}
       <RegenerateInviteButton userId={u.id} lang={lang} labels={{ ...dict.admin.regen, link: dict.admin.invite }} />
       <Link href={`/${lang}/admin/audit?target=${encodeURIComponent(u.id)}`} className="text-sm underline">{d.auditLink}</Link>
     </main>
