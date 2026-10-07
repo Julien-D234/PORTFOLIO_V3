@@ -1,7 +1,7 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : blocs A, B, invitations et C FAITS.
-Prochain bloc : **D (garde-fous auto-action + matrice d'accès)**, puis E.
+Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : blocs A, B, invitations, C et D FAITS.
+Prochain bloc : **E (clôture : smoke curl, revue sécurité)**.
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -63,8 +63,10 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
      traduites) + `POST /api/admin/users/[id]/unlock` (`src/server/admin/actions.ts` `unlockUser`, audit `user.unlocked`). Intégré dans `/admin/users/[id]` ;
      sur son propre compte l'admin voit un message à la place des actions (le serveur ne l'impose pas encore : c'est le bloc D). i18n `admin.actions.*`.
      Tests : `tests/admin-actions.test.ts`.
-   - **D. À FAIRE** (côté SERVEUR, hook `before`) un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (en plus de `LAST_ADMIN`, hook `before` de
-     `create-auth.ts`) ; audit de chaque action sans secret ; test de matrice anonyme/user/admin sur toutes les pages et endpoints.
+   - **D. FAIT** hook `before` de `create-auth.ts` : `SELF_ACTION` (403) si un admin se bannit/supprime/se retire son rôle (set-role vers `admin` reste permis) ;
+     `LAST_ADMIN` conservé en défense en profondeur (pratiquement atteint via SELF_ACTION). Erreur traduite (`admin.actions.errors.selfAction`).
+     `tests/access-matrix.test.ts` : test structurel (chaque page/layout admin appelle `requireAdmin`, chaque route `api/admin` appelle `requireApi("admin")` avant la DB
+     + `isSameOrigin` sur POST) + matrice `authorize` anonyme/user/admin. La matrice HTTP réelle reste à faire en smoke curl (bloc E). Les actions refusées ne sont pas auditées.
    - **E. À FAIRE** clôture : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection recherche, fuite de
      données), HANDOFF, un commit par bloc, push, suivi CI.
    - Futur : envoi du lien par e-mail quand domaine/SMTP existeront.

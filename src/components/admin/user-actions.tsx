@@ -13,7 +13,7 @@ export interface UserActionsLabels {
   remove: { title: string; hint: string; placeholder: string; submit: string; confirm: string };
   done: string;
   pending: string;
-  errors: Record<"lastAdmin" | "passwordPolicy" | "forbidden" | "unauthenticated" | "rateLimited" | "notFound" | "network", string>;
+  errors: Record<"lastAdmin" | "selfAction" | "passwordPolicy" | "forbidden" | "unauthenticated" | "rateLimited" | "notFound" | "network", string>;
 }
 
 export interface UserActionsProps {
@@ -34,6 +34,7 @@ type ErrorKey = keyof UserActionsLabels["errors"];
 function errorKey(status: number, data: { message?: string; error?: string } | null): ErrorKey {
   const m = data?.message ?? data?.error;
   if (m === "LAST_ADMIN") return "lastAdmin";
+  if (m === "SELF_ACTION") return "selfAction";
   if (m === "PASSWORD_POLICY") return "passwordPolicy";
   if (status === 401) return "unauthenticated";
   if (status === 403) return "forbidden";

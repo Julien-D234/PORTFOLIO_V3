@@ -206,7 +206,8 @@
         "unauthenticated": "Session expirée. Reconnectez-vous.",
         "rateLimited": "Trop de demandes. Réessayez dans une minute.",
         "notFound": "Compte introuvable.",
-        "network": "Une erreur est survenue. Réessayez plus tard."
+        "network": "Une erreur est survenue. Réessayez plus tard.",
+        "selfAction": "Action impossible sur votre propre compte."
       },
       "self": "C'est votre propre compte : vous ne pouvez pas le bannir, le supprimer ni modifier votre rôle."
     }

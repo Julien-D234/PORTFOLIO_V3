@@ -206,7 +206,8 @@
         "unauthenticated": "Session expired. Please sign in again.",
         "rateLimited": "Too many requests. Try again in a minute.",
         "notFound": "Account not found.",
-        "network": "Something went wrong. Try again later."
+        "network": "Something went wrong. Try again later.",
+        "selfAction": "Not possible on your own account."
       },
       "self": "This is your own account: you cannot ban it, delete it or change its role."
     }

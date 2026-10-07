@@ -132,6 +132,12 @@ export function createAuth(db: Db, opts: AuthOptions) {
         if (ADMIN_MUTATIONS.includes(ctx.path)) {
           const body = (ctx.body ?? {}) as { userId?: string; role?: string | string[] };
           if (!body.userId) return;
+          // Un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (même s'il reste d'autres admins).
+          const keepsAdmin = ctx.path === "/admin/set-role" && [body.role ?? []].flat().some((r) => r === "admin");
+          if (!keepsAdmin) {
+            const me = await getSessionFromCtx(ctx).catch(() => null);
+            if (me && me.user.id === body.userId) throw new APIError("FORBIDDEN", { message: "SELF_ACTION" });
+          }
           const [target] = await db.select().from(schema.user).where(eq(schema.user.id, body.userId));
           if (!target || !target.role.split(",").includes("admin")) return;
           const stays =

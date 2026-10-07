@@ -61,20 +61,26 @@ describe("actions admin (endpoints Better Auth utilisés par l'UI)", () => {
     expect(await audit("admin.remove-user", t.id)).toHaveLength(1);
   });
 
-  it("LAST_ADMIN : le seul admin ne peut être ni rétrogradé, ni banni, ni supprimé", async () => {
-    const other = await seedUser(env, { email: "solo@test.dev", role: "admin" });
-    // on bannit tous les autres admins sauf `solo` en passant par la base, puis on tente via l'API depuis admin@
+  it("dernier admin actif : ne peut être ni rétrogradé, ni banni, ni supprimé (SELF_ACTION ou LAST_ADMIN)", async () => {
+    const solo = await seedUser(env, { email: "solo@test.dev", role: "admin" });
     await env.db.update(schema.user).set({ banned: true }).where(eq(schema.user.id, adminId));
-    for (const [p, b] of [
-      ["/admin/set-role", { userId: other.id, role: "user" }],
-      ["/admin/ban-user", { userId: other.id }],
-      ["/admin/remove-user", { userId: other.id }],
-    ] as const) {
-      const r = await call(env, "POST", p, { cookie: (await login(env, "solo@test.dev")).cookie, body: b });
-      expect(r.status).toBe(403);
-      expect(JSON.stringify(r.json)).toContain("LAST_ADMIN");
+    try {
+      const cookie = (await login(env, "solo@test.dev")).cookie;
+      for (const [p, b] of [
+        ["/admin/set-role", { userId: solo.id, role: "user" }],
+        ["/admin/ban-user", { userId: solo.id }],
+        ["/admin/remove-user", { userId: solo.id }],
+      ] as const) {
+        const r = await call(env, "POST", p, { cookie, body: b });
+        expect(r.status).toBe(403);
+        expect(JSON.stringify(r.json)).toMatch(/SELF_ACTION|LAST_ADMIN/);
+      }
+      const u = await row(solo.id);
+      expect(u.role).toBe("admin");
+      expect(u.banned).toBe(false);
+    } finally {
+      await env.db.update(schema.user).set({ banned: false }).where(eq(schema.user.id, adminId));
     }
-    await env.db.update(schema.user).set({ banned: false }).where(eq(schema.user.id, adminId));
   });
 });
 
@@ -94,5 +100,31 @@ describe("déverrouillage", () => {
   it("compte inconnu : false, aucun audit", async () => {
     expect(await unlockUser(env.db, "nope", { actorId: adminId })).toBe(false);
     expect(await audit("user.unlocked", "nope")).toHaveLength(0);
+  });
+});
+
+describe("garde-fous : un admin n'agit pas sur son propre compte", () => {
+  it("ne peut ni se bannir, ni se supprimer, ni se rétrograder (même avec d'autres admins)", async () => {
+    await seedUser(env, { email: "autre-admin@test.dev", role: "admin" });
+    for (const [p, b] of [
+      ["/admin/set-role", { userId: adminId, role: "user" }],
+      ["/admin/ban-user", { userId: adminId }],
+      ["/admin/remove-user", { userId: adminId }],
+    ] as const) {
+      const r = await post(p, b);
+      expect(r.status).toBe(403);
+      expect(JSON.stringify(r.json)).toContain("SELF_ACTION");
+    }
+    const u = await row(adminId);
+    expect(u.role).toBe("admin");
+    expect(u.banned).toBe(false);
+    expect((await env.db.select().from(schema.auditLog)).some((l) => l.targetId === adminId && /ban|remove|set-role/.test(l.action))).toBe(false);
+  });
+  it("garder son rôle admin reste permis", async () => {
+    expect((await post("/admin/set-role", { userId: adminId, role: "admin" })).status).toBe(200);
+  });
+  it("un admin peut toujours agir sur un autre admin", async () => {
+    const o = await seedUser(env, { email: "cible-admin@test.dev", role: "admin" });
+    expect((await post("/admin/set-role", { userId: o.id, role: "user" })).status).toBe(200);
   });
 });
