@@ -45,7 +45,7 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
      lien à usage unique `/[lang]/welcome?token=…` affiché UNE fois à l'admin (pas d'e-mail : pas de SMTP/domaine, l'admin transmet le lien).
      L'utilisateur choisit son mdp (12-128) et est connecté ; `mustChangePassword` reste false. Même mécanisme pour le reset : bouton
      « Regénérer un lien » (invalide l'ancien). Table `invitation` (hash SHA-256 du jeton, userId, expiresAt, usedAt) + migration ;
-     jeton 256 bits aléatoires, seul le hash est stocké, expiration 48 h (à confirmer), usage unique, réponse identique pour
+     jeton 256 bits aléatoires, seul le hash est stocké, expiration 48 h (confirmé par Julien), usage unique, réponse identique pour
      invalide/expiré/utilisé, `POST /api/welcome` rate-limité, jeton retiré de l'URL + `Referrer-Policy: no-referrer`, usage du lien
      révoque les sessions existantes, création/consommation auditées sans le jeton. Le formulaire de création ne demande plus de mdp.
    - **E. Clôture** : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection dans la recherche,
