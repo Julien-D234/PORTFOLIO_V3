@@ -1,0 +1,12 @@
+# HTTPS automatique (Let's Encrypt) pour {$SITE_DOMAIN}, ex. monsite.fr
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+	# Les en-têtes de sécurité et la CSP sont posés par l'application.
+	header -Server
+}
+
+# Redirige www vers le domaine nu
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}

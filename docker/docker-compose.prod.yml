@@ -1,0 +1,23 @@
+# Surcharge de production (VPS) :
+#   docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d
+services:
+  app:
+    image: ghcr.io/julien-d234/portfolio_v3:${IMAGE_TAG:-latest}
+    build: !reset null
+    ports: !reset []
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+volumes:
+  caddy_data:
+  caddy_config:
