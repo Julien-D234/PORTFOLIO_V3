@@ -1,7 +1,7 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : ÉTAPE 4 TERMINÉE (blocs A à E, CI verte).
-Prochaine étape : **5 (Projets)** — proposer le plan à Julien et le faire valider avant de coder.
+Dernier état : étapes 1-4 terminées ; **application DÉPLOYÉE** sur VPS OVH (https://giant-rhetoric-94.fr). Voir section « Production » ci-dessous.
+Prochaine étape : **5 (Projets)** — proposer le plan à Julien et le faire valider avant de coder. Julien veut d'abord voir le rendu en ligne et le design des étapes 5 et 6 (maquettes possibles).
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -79,6 +79,16 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
    `POST /api/v1/games/{slug}/stats` + clé d'API par jeu (hachée, révocable), plafonds de plausibilité, rate-limit. Revue sécurité dédiée.
 7. **Profil** : stats par jeu, changement mdp/langue.
 8. **Production** : déploiement SSH/GHCR, migrations au démarrage (pas encore dans l'image), sauvegardes Postgres, durcissement VPS.
+
+## Production (VPS OVH, fait)
+- VPS-1 Ubuntu 26.04, IP 57.129.179.81, domaine `giant-rhetoric-94.fr` (A sur racine + www, www redirige vers racine). Accès SSH `ubuntu` par clé
+  uniquement (clé agent `~/.ssh/portfolio_vps` + clé de Julien) ; mdp/root désactivés (`/etc/ssh/sshd_config.d/99-hardening.conf`). UFW : 22, 80, 443 tcp/udp.
+  Pas de fail2ban (choix de Julien). Mises à jour de sécurité auto, sysctl durci, swap 2 Go. Docker 29 (utiliser `sudo docker`, `ubuntu` hors groupe docker).
+- Déploiement ACTUEL = build sur le VPS (pas GHCR) : code dans `/srv/portfolio` (copié par tar ; `.env` à part, secrets générés sur place, jamais dans git), puis
+  `sudo docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d --build` (build ~5 min). `deploy.yml` (GHCR) reste désactivé.
+- Migrations au démarrage : service compose `migrate` (stage Dockerfile `tools`), `app` attend `service_completed_successfully`.
+- Premier admin : `ssh -t ubuntu@IP 'cd /srv/portfolio && sudo docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml run --rm migrate npm run create-admin -- --email X --name Y'` (mdp saisi masqué).
+- Sauvegardes : `docker/backup.sh` (pg_dump gz, 14 j) via cron root 03:00 vers `/srv/backups`. PAS de copie hors serveur pour l'instant.
 
 ## Pièges connus (environnement de dev de l'agent)
 - Tests : chaque fichier lance une base PGlite + Argon2 ; `vitest.config.mts` borne `maxWorkers: 3` et allonge `hookTimeout` (sinon timeouts de

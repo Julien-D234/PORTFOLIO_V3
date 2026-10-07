@@ -15,6 +15,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # Applique les migrations au démarrage, puis s'arrête. Sert aussi à créer le premier admin :
+  #   docker compose run --rm migrate npm run create-admin -- --email x@y.z --name "Nom"
+  migrate:
+    build:
+      context: .
+      target: tools
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    restart: "no"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: ["/tmp"]
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:17-alpine

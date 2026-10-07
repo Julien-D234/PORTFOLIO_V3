@@ -12,6 +12,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
+# Outillage (migrations, create-admin) : image complète avec devDependencies. Jamais exposée.
+FROM build AS tools
+ENV NEXT_TELEMETRY_DISABLED=1
+USER node
+CMD ["npm", "run", "db:migrate"]
+
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN addgroup -S app && adduser -S app -G app

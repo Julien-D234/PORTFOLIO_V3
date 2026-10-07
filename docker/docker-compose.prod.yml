@@ -1,9 +1,7 @@
-# Surcharge de production (VPS) :
-#   docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d
+# Surcharge de production (VPS) : l'image est construite sur le serveur depuis le dépôt.
+#   docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d --build
 services:
   app:
-    image: ghcr.io/julien-d234/portfolio_v3:${IMAGE_TAG:-latest}
-    build: !reset null
     ports: !reset []
   caddy:
     image: caddy:2-alpine
@@ -11,6 +9,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN}
     volumes:
