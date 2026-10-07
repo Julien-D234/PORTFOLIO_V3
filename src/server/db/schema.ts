@@ -120,6 +120,26 @@ export const auditLog = pgTable(
   (t) => [index("audit_log_created_idx").on(t.createdAt)],
 );
 
+/**
+ * Invitations de première connexion / réinitialisation : lien à usage unique.
+ * Seul le hash SHA-256 du jeton est stocké (jamais le jeton).
+ */
+export const invitation = pgTable(
+  "invitation",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    createdBy: text("created_by"), // pas de FK : trace conservée si l'admin est supprimé
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("invitation_user_id_idx").on(t.userId)],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -138,4 +158,5 @@ export type DbSchema = {
   verification: typeof verification;
   rateLimit: typeof rateLimit;
   auditLog: typeof auditLog;
+  invitation: typeof invitation;
 };

@@ -20,7 +20,10 @@ export default async function AdminUsers({ params, searchParams }: PageProps<"/[
 
   return (
     <main className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{t.title}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">{t.title}</h1>
+        <Link href={`/${lang}/admin/users/new`} className="rounded border border-neutral-400 px-3 py-2 text-sm">{dict.admin.users_new}</Link>
+      </div>
       <form method="get" className="flex gap-2 text-sm">
         <input name="q" defaultValue={q ?? ""} maxLength={100} placeholder={t.search} aria-label={t.search}
           className="flex-1 rounded border border-neutral-400 bg-transparent px-3 py-2" />

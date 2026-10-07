@@ -6,6 +6,7 @@ import { requireAdmin } from "@/server/guards";
 import { getDb } from "@/server/db";
 import { getUser } from "@/server/admin/queries";
 import { fmtDate } from "@/lib/format";
+import { RegenerateInviteButton } from "@/components/admin/regenerate-invite-button";
 
 // Les actions (rôle, ban, sessions, suppression…) arrivent au bloc C.
 export default async function AdminUserDetail({ params }: PageProps<"/[lang]/admin/users/[id]">) {
@@ -58,6 +59,7 @@ export default async function AdminUserDetail({ params }: PageProps<"/[lang]/adm
           </table>
         )}
       </section>
+      <RegenerateInviteButton userId={u.id} lang={lang} labels={{ ...dict.admin.regen, link: dict.admin.invite }} />
       <Link href={`/${lang}/admin/audit?target=${encodeURIComponent(u.id)}`} className="text-sm underline">{d.auditLink}</Link>
     </main>
   );

@@ -120,6 +120,56 @@
       "prev": "Previous",
       "next": "Next",
       "page": "Page {page} of {count}"
+    },
+    "new": {
+      "title": "New user",
+      "email": "Email address",
+      "name": "Name",
+      "role": "Role",
+      "submit": "Create and generate link",
+      "submitting": "Creating…",
+      "another": "Create another account",
+      "errors": {
+        "validation": "Check the email and name.",
+        "emailTaken": "This email is already in use.",
+        "forbidden": "Action not allowed.",
+        "rateLimited": "Too many requests. Try again in a minute.",
+        "network": "Something went wrong. Try again later."
+      }
+    },
+    "invite": {
+      "title": "Invitation link",
+      "warning": "This link is shown only once. Send it to the user through a trusted channel: it lets them choose the account password.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "expires": "Expires"
+    },
+    "users_new": "New user",
+    "regen": {
+      "button": "Regenerate invitation link",
+      "confirm": "The previous link will be invalidated. Generate a new link?",
+      "pending": "Generating…",
+      "errors": {
+        "forbidden": "Action not allowed.",
+        "rateLimited": "Too many requests. Try again in a minute.",
+        "network": "Something went wrong. Try again later."
+      }
+    }
+  },
+  "welcome": {
+    "title": "Welcome",
+    "intro": "Choose your password (12 to 128 characters).",
+    "password": "Password",
+    "confirm": "Confirm password",
+    "submit": "Confirm",
+    "submitting": "Saving…",
+    "loginLink": "Go to sign in",
+    "errors": {
+      "invalid": "This link is invalid, expired or already used.",
+      "validation": "The password must be between 12 and 128 characters.",
+      "mismatch": "Passwords do not match.",
+      "rateLimited": "Too many attempts. Try again in a minute.",
+      "network": "Something went wrong. Try again later."
     }
   }
 }

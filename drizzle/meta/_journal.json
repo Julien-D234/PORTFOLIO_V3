@@ -15,6 +15,13 @@
       "when": 1791379710211,
       "tag": "0001_yielding_tigra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791391024394,
+      "tag": "0002_harsh_ser_duncan",
+      "breakpoints": true
     }
   ]
 }

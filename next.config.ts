@@ -17,7 +17,17 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   async headers() {
     // La CSP (avec nonce) est posée par src/proxy.ts.
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Page d'accueil des invitations : aucune fuite de Referer, jamais mise en cache.
+      {
+        source: "/:lang/welcome",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+    ];
   },
   turbopack: {
     rules: {
