@@ -2,5 +2,38 @@
   "meta": {
     "title": "Portfolio",
     "description": ""
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "errors": {
+        "invalid": "Invalid credentials.",
+        "rateLimited": "Too many attempts. Try again in a minute.",
+        "unavailable": "Account unavailable.",
+        "network": "Something went wrong. Please try again later.",
+        "validation": "Enter a valid email address and password."
+      }
+    },
+    "changePassword": {
+      "title": "Change password",
+      "current": "Current password",
+      "next": "New password (12 characters minimum)",
+      "confirm": "Confirm new password",
+      "submit": "Save",
+      "submitting": "Saving…",
+      "errors": {
+        "validation": "The new password must be between 12 and 128 characters.",
+        "mismatch": "Passwords do not match.",
+        "same": "The new password must differ from the current one.",
+        "invalid": "Current password is incorrect.",
+        "rateLimited": "Too many attempts. Try again in a minute.",
+        "network": "Something went wrong. Please try again later."
+      }
+    },
+    "signOut": "Sign out"
   }
 }

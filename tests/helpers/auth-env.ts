@@ -11,7 +11,7 @@ export const BASE = "http://localhost:3000";
 export const PASSWORD = "correct-horse-battery-1";
 
 /** Base Postgres en mémoire (WASM) migrée avec les vraies migrations Drizzle. */
-export async function makeEnv() {
+export async function makeEnv(o: { rateLimit?: boolean } = {}) {
   const client = new PGlite();
   const db = drizzle(client, { schema }) as unknown as Db;
   await migrate(drizzle(client), { migrationsFolder: path.resolve(__dirname, "../../drizzle") });
@@ -19,7 +19,7 @@ export async function makeEnv() {
     secret: "test-secret-test-secret-test-secret-123456",
     baseURL: BASE,
     production: false,
-    disableRateLimit: true,
+    disableRateLimit: !o.rateLimit,
   });
   return { db, auth, client };
 }

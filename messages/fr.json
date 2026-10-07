@@ -2,5 +2,38 @@
   "meta": {
     "title": "Portfolio",
     "description": ""
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "errors": {
+        "invalid": "Identifiants incorrects.",
+        "rateLimited": "Trop de tentatives. Réessayez dans une minute.",
+        "unavailable": "Compte indisponible.",
+        "network": "Une erreur est survenue. Réessayez plus tard.",
+        "validation": "Saisissez une adresse e-mail et un mot de passe valides."
+      }
+    },
+    "changePassword": {
+      "title": "Changer le mot de passe",
+      "current": "Mot de passe actuel",
+      "next": "Nouveau mot de passe (12 caractères minimum)",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "submit": "Enregistrer",
+      "submitting": "Enregistrement…",
+      "errors": {
+        "validation": "Le nouveau mot de passe doit contenir entre 12 et 128 caractères.",
+        "mismatch": "Les mots de passe ne correspondent pas.",
+        "same": "Le nouveau mot de passe doit être différent de l'actuel.",
+        "invalid": "Mot de passe actuel incorrect.",
+        "rateLimited": "Trop de tentatives. Réessayez dans une minute.",
+        "network": "Une erreur est survenue. Réessayez plus tard."
+      }
+    },
+    "signOut": "Se déconnecter"
   }
 }

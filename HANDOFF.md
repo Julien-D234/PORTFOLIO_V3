@@ -1,6 +1,6 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1 et 2 terminées, CI verte. Prochaine étape : **3 (page de connexion)**.
+Dernier état : étapes 1, 2 et 3 terminées (étape 3 à pousser/vérifier en CI). Prochaine étape : **4 (administration)**.
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -25,9 +25,11 @@ Garde-fous en place : pas de sign-up public, mdp 12-128 car. (aussi appliqué au
 un admin et levé après `/change-password`, audit_log, rate-limit en base (5 connexions/min), non-admin → 404 sur pages admin.
 
 ## Reste à faire (ordre)
-3. **Connexion** : `/[lang]/login`, `/[lang]/change-password` (forcé), déconnexion POST, redirection `next` en liste blanche,
-   erreurs génériques (401 identique compte inconnu/mauvais mdp), gestion 429 et banni, tests (Playwright si possible, sinon composants).
-   Option : verrouillage de compte après N échecs (non fait ; seul le rate-limit par IP existe).
+3. ~~Connexion~~ FAIT : `/[lang]/login`, `/[lang]/change-password`, déconnexion POST, `safeRedirect` (`src/lib/auth-forms.ts`,
+   liste blanche), erreur 401 identique, 429/banni gérés, verrouillage de compte (10 échecs → 15 min, `failedLoginCount`/`lockedUntil`,
+   hooks dans `create-auth.ts`, audit `login_failed`/`account_locked`). Tests Vitest uniquement (Playwright écarté par Julien).
+   Les formulaires appellent `/api/auth/*` en `fetch` depuis le client (et non `auth.api.*` côté serveur) : le rate-limit Better Auth
+   ne s'applique pas aux appels serveur directs. Les gardes redirigeaient déjà vers change-password si `mustChangePassword`.
 4. **Administration** : liste/création/rôle/ban/reset mdp/révocation sessions/lecture audit, derrière `requireAdmin`.
 5. **Projets** : `project` + `project_translation` (fr/en), page publique + gestion admin.
 6. **Mini-jeux** : `game`, `game_session`, `game_stat` (JSONB), page de sélection, JWT court (10 min) userId+gameId,
@@ -46,6 +48,8 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
 - Un ancien `next-server` peut occuper le port 3100 : vérifier `curl /api/health` avant de conclure qu'une route est 404.
 - Better Auth : `internalAdapter.createUser(data, { method: "admin" })` (2ᵉ argument requis par le typage) ; le plugin admin n'applique pas
   `minPasswordLength` (d'où le hook) ; cookies préfixés `__Secure-` en prod (pas `__Host-`).
+- `npm run dev:db` n'accepte qu'une connexion : lancer Next avec `DB_POOL_MAX=1` (le singleton DB est sur `globalThis`).
+- Le navigateur de l'agent bloque localhost : smoke tests via curl.
 - IP du rate-limit lue dans `X-Forwarded-For` : sûr uniquement derrière Caddy.
 
 ## Commandes
