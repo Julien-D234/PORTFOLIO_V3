@@ -30,4 +30,5 @@ jobs:
     if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     steps:
       - name: Déploiement SSH
-        run: echo "TODO : ssh vers le VPS, docker compose pull && up -d (à écrire avec l'accès VPS)"
+        run: |
+          echo "TODO - ssh vers le VPS, docker compose pull puis up -d (a ecrire avec l'acces VPS)"
