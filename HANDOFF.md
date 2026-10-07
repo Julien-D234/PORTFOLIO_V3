@@ -1,7 +1,7 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : blocs A, B et invitations FAITS, poussés, CI verte (4b7dd0f).
-Prochain bloc : **C (actions admin)**, puis D, E.
+Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : blocs A, B, invitations et C FAITS.
+Prochain bloc : **D (garde-fous auto-action + matrice d'accès)**, puis E.
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -58,11 +58,12 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
      verrouillage. La création passe par `internalAdapter` (pas par l'endpoint Better Auth : pas de `mustChangePassword`). Regénérer un lien ne change
      PAS le mot de passe actuel (valable jusqu'à usage du lien). Audit : `user.created`, `invitation.created|regenerated|used` (sans jeton).
      Tests : `tests/invitations.test.ts`. Pas d'e-mail (pas de SMTP/domaine) : l'admin transmet le lien.
-   - **C. À FAIRE** actions en `fetch` client vers `/api/auth/admin/*` (rate-limit + hooks existants s'appliquent) : rôle, ban (motif + durée optionnelle),
-     déban, révocation des sessions, suppression. Confirmation pour les destructives ; **suppression : l'admin retape l'e-mail**. Erreurs `LAST_ADMIN`,
-     `PASSWORD_POLICY`, 403 traduites. Ajouter `POST /api/admin/users/[id]/unlock` (`requireApi("admin")` + `isSameOrigin`, `failedLoginCount`=0,
-     `lockedUntil`=null, audité). Les composants vont dans `src/components/admin/`, clés i18n sous `admin.*` (fr + en, test de parité).
-   - **D. À FAIRE** un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (en plus de `LAST_ADMIN`, hook `before` de
+   - **C. FAIT** `src/components/admin/user-actions.tsx` (client, `fetch` vers `/api/auth/admin/{set-role,ban-user,unban-user,revoke-user-sessions,remove-user}`,
+     confirmations `window.confirm`, suppression = retaper l'e-mail, ban = motif + durée 1h/1j/7j/30j/définitif, erreurs `LAST_ADMIN`/`PASSWORD_POLICY`/401/403/404/429
+     traduites) + `POST /api/admin/users/[id]/unlock` (`src/server/admin/actions.ts` `unlockUser`, audit `user.unlocked`). Intégré dans `/admin/users/[id]` ;
+     sur son propre compte l'admin voit un message à la place des actions (le serveur ne l'impose pas encore : c'est le bloc D). i18n `admin.actions.*`.
+     Tests : `tests/admin-actions.test.ts`.
+   - **D. À FAIRE** (côté SERVEUR, hook `before`) un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (en plus de `LAST_ADMIN`, hook `before` de
      `create-auth.ts`) ; audit de chaque action sans secret ; test de matrice anonyme/user/admin sur toutes les pages et endpoints.
    - **E. À FAIRE** clôture : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection recherche, fuite de
      données), HANDOFF, un commit par bloc, push, suivi CI.
