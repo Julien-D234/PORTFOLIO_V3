@@ -1,6 +1,6 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1, 2 et 3 terminées (étape 3 à pousser/vérifier en CI). Prochaine étape : **4 (administration)**.
+Dernier état : étapes 1, 2 et 3 terminées, poussées, CI verte (70210ef). Prochaine étape : **4 (administration)**, plan validé ci-dessous.
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -30,7 +30,27 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
    hooks dans `create-auth.ts`, audit `login_failed`/`account_locked`). Tests Vitest uniquement (Playwright écarté par Julien).
    Les formulaires appellent `/api/auth/*` en `fetch` depuis le client (et non `auth.api.*` côté serveur) : le rate-limit Better Auth
    ne s'applique pas aux appels serveur directs. Les gardes redirigeaient déjà vers change-password si `mustChangePassword`.
-4. **Administration** : liste/création/rôle/ban/reset mdp/révocation sessions/lecture audit, derrière `requireAdmin`.
+4. **Administration** (plan VALIDÉ par Julien, rien n'est codé) : tout derrière `requireAdmin` (non-admin → 404).
+   - **A. Lecture** `src/server/admin/queries.ts` : `listUsers` (pagination, recherche e-mail/nom), `getUser` (+ sessions actives), `listAudit`
+     (pagination, filtre action/cible). Requêtes DB directes, jamais de hash de mot de passe. Tests PGlite.
+   - **B. Pages fr/en** : `/[lang]/admin` (tableau de bord), `/admin/users` (rôle, statut actif/banni/verrouillé/mdp à changer),
+     `/admin/users/new`, `/admin/users/[id]` (détail, sessions, actions), `/admin/audit` (lecture seule). Clés i18n dans les 2 langues.
+   - **C. Actions** en `fetch` client vers `/api/auth/admin/*` (rate-limit + hooks existants s'appliquent) : rôle, ban (motif + durée optionnelle),
+     déban, révocation des sessions, suppression. Confirmation pour les actions destructives ; **suppression : l'admin retape l'e-mail**.
+     Erreurs `LAST_ADMIN`, `PASSWORD_POLICY`, 403 traduites. Ajouter un déverrouillage manuel : `POST /api/admin/users/[id]/unlock`
+     (`requireApi("admin")`, remet `failedLoginCount`=0 et `lockedUntil`=null, audité).
+   - **D. Garde-fous** : un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (en plus de `LAST_ADMIN`) ; audit de
+     chaque action sans secret ; test de matrice anonyme/user/admin sur toutes les pages et endpoints.
+   - **Invitation (remplace le mot de passe provisoire)** : à la création, le compte reçoit un mdp aléatoire inconnu ; le serveur génère un
+     lien à usage unique `/[lang]/welcome?token=…` affiché UNE fois à l'admin (pas d'e-mail : pas de SMTP/domaine, l'admin transmet le lien).
+     L'utilisateur choisit son mdp (12-128) et est connecté ; `mustChangePassword` reste false. Même mécanisme pour le reset : bouton
+     « Regénérer un lien » (invalide l'ancien). Table `invitation` (hash SHA-256 du jeton, userId, expiresAt, usedAt) + migration ;
+     jeton 256 bits aléatoires, seul le hash est stocké, expiration 48 h (à confirmer), usage unique, réponse identique pour
+     invalide/expiré/utilisé, `POST /api/welcome` rate-limité, jeton retiré de l'URL + `Referrer-Policy: no-referrer`, usage du lien
+     révoque les sessions existantes, création/consommation auditées sans le jeton. Le formulaire de création ne demande plus de mdp.
+   - **E. Clôture** : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection dans la recherche,
+     fuite de données), HANDOFF, un commit par bloc, push, suivi CI.
+   - **Ordre** : A, B, table `invitation` + lien + page welcome, C, D, E. Un futur envoi d'e-mail du lien se branchera quand le domaine/SMTP existera.
 5. **Projets** : `project` + `project_translation` (fr/en), page publique + gestion admin.
 6. **Mini-jeux** : `game`, `game_session`, `game_stat` (JSONB), page de sélection, JWT court (10 min) userId+gameId,
    `POST /api/v1/games/{slug}/stats` + clé d'API par jeu (hachée, révocable), plafonds de plausibilité, rate-limit. Revue sécurité dédiée.
