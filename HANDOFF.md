@@ -1,6 +1,7 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
-Dernier état : étapes 1, 2 et 3 terminées, poussées, CI verte (70210ef). Prochaine étape : **4 (administration)**, plan validé ci-dessous.
+Dernier état : étapes 1-3 terminées ; étape 4 (administration) en cours : blocs A, B et invitations FAITS, poussés, CI verte (4b7dd0f).
+Prochain bloc : **C (actions admin)**, puis D, E.
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -30,27 +31,32 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
    hooks dans `create-auth.ts`, audit `login_failed`/`account_locked`). Tests Vitest uniquement (Playwright écarté par Julien).
    Les formulaires appellent `/api/auth/*` en `fetch` depuis le client (et non `auth.api.*` côté serveur) : le rate-limit Better Auth
    ne s'applique pas aux appels serveur directs. Les gardes redirigeaient déjà vers change-password si `mustChangePassword`.
-4. **Administration** (plan VALIDÉ par Julien, rien n'est codé) : tout derrière `requireAdmin` (non-admin → 404).
-   - **A. Lecture** `src/server/admin/queries.ts` : `listUsers` (pagination, recherche e-mail/nom), `getUser` (+ sessions actives), `listAudit`
-     (pagination, filtre action/cible). Requêtes DB directes, jamais de hash de mot de passe. Tests PGlite.
-   - **B. Pages fr/en** : `/[lang]/admin` (tableau de bord), `/admin/users` (rôle, statut actif/banni/verrouillé/mdp à changer),
-     `/admin/users/new`, `/admin/users/[id]` (détail, sessions, actions), `/admin/audit` (lecture seule). Clés i18n dans les 2 langues.
-   - **C. Actions** en `fetch` client vers `/api/auth/admin/*` (rate-limit + hooks existants s'appliquent) : rôle, ban (motif + durée optionnelle),
-     déban, révocation des sessions, suppression. Confirmation pour les actions destructives ; **suppression : l'admin retape l'e-mail**.
-     Erreurs `LAST_ADMIN`, `PASSWORD_POLICY`, 403 traduites. Ajouter un déverrouillage manuel : `POST /api/admin/users/[id]/unlock`
-     (`requireApi("admin")`, remet `failedLoginCount`=0 et `lockedUntil`=null, audité).
-   - **D. Garde-fous** : un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (en plus de `LAST_ADMIN`) ; audit de
-     chaque action sans secret ; test de matrice anonyme/user/admin sur toutes les pages et endpoints.
-   - **Invitation (remplace le mot de passe provisoire)** : à la création, le compte reçoit un mdp aléatoire inconnu ; le serveur génère un
-     lien à usage unique `/[lang]/welcome?token=…` affiché UNE fois à l'admin (pas d'e-mail : pas de SMTP/domaine, l'admin transmet le lien).
-     L'utilisateur choisit son mdp (12-128) et est connecté ; `mustChangePassword` reste false. Même mécanisme pour le reset : bouton
-     « Regénérer un lien » (invalide l'ancien). Table `invitation` (hash SHA-256 du jeton, userId, expiresAt, usedAt) + migration ;
-     jeton 256 bits aléatoires, seul le hash est stocké, expiration 48 h (confirmé par Julien), usage unique, réponse identique pour
-     invalide/expiré/utilisé, `POST /api/welcome` rate-limité, jeton retiré de l'URL + `Referrer-Policy: no-referrer`, usage du lien
-     révoque les sessions existantes, création/consommation auditées sans le jeton. Le formulaire de création ne demande plus de mdp.
-   - **E. Clôture** : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection dans la recherche,
-     fuite de données), HANDOFF, un commit par bloc, push, suivi CI.
-   - **Ordre** : A, B, table `invitation` + lien + page welcome, C, D, E. Un futur envoi d'e-mail du lien se branchera quand le domaine/SMTP existera.
+4. **Administration** (plan VALIDÉ par Julien) : tout derrière `requireAdmin` (non-admin → 404 ; anonyme → 307 vers login).
+   - **A. FAIT** `src/server/admin/queries.ts` : `listUsers`, `getUser` (+ sessions actives), `listAudit`, `listAuditActions`. Colonnes énumérées
+     (jamais de hash ni de jeton de session), pagination bornée (20 défaut, 100 max), recherche littérale (`escapeLike`). `tests/admin-queries.test.ts`.
+   - **B. FAIT** pages fr/en : `/[lang]/admin` (+ `layout.tsx` avec `requireAdmin`, rappelé dans chaque page), `/admin/users` (recherche, pagination,
+     statut actif/banni/verrouillé + « mdp à changer »), `/admin/users/new`, `/admin/users/[id]` (détail + sessions, SANS actions pour l'instant),
+     `/admin/audit` (filtre action/cible). Helpers `src/lib/format.ts`, `src/components/admin/pagination.tsx`.
+   - **Invitations FAITES** (remplacent le mot de passe provisoire) : table `invitation` (migration 0002, hash SHA-256 du jeton, `expiresAt` 48 h, `usedAt`),
+     `src/server/admin/invitations.ts` (`createInvitedUser`, `issueInvitation`, `acceptInvitation`), `src/server/rate-limit.ts` (`allowRequest`, préfixe `app:`
+     dans la table `rate_limit`), `src/server/http.ts` (`isSameOrigin` = défense CSRF, `clientIp`, `readJson` borné, `invitationLink`).
+     Routes : `POST /api/admin/users` (création), `POST /api/admin/users/[id]/invitation` (regénération), `POST /api/welcome` (public, 10/min/IP,
+     connexion immédiate via `auth.api.signInEmail` + copie des Set-Cookie). Page `/[lang]/welcome` + `WelcomeForm`.
+     **Le jeton est dans le FRAGMENT** (`/fr/welcome#token=…`, jamais envoyé au serveur ni dans Referer), retiré de l'URL par le client ; en-têtes
+     `Referrer-Policy: no-referrer` + `no-store` sur `/:lang/welcome` (next.config.ts). Même réponse `INVALID_LINK` pour jeton mal formé/inconnu/expiré/
+     utilisé/compte banni ; politique de mot de passe vérifiée AVANT consommation ; consommation atomique ; usage = révoque les sessions, lève le
+     verrouillage. La création passe par `internalAdapter` (pas par l'endpoint Better Auth : pas de `mustChangePassword`). Regénérer un lien ne change
+     PAS le mot de passe actuel (valable jusqu'à usage du lien). Audit : `user.created`, `invitation.created|regenerated|used` (sans jeton).
+     Tests : `tests/invitations.test.ts`. Pas d'e-mail (pas de SMTP/domaine) : l'admin transmet le lien.
+   - **C. À FAIRE** actions en `fetch` client vers `/api/auth/admin/*` (rate-limit + hooks existants s'appliquent) : rôle, ban (motif + durée optionnelle),
+     déban, révocation des sessions, suppression. Confirmation pour les destructives ; **suppression : l'admin retape l'e-mail**. Erreurs `LAST_ADMIN`,
+     `PASSWORD_POLICY`, 403 traduites. Ajouter `POST /api/admin/users/[id]/unlock` (`requireApi("admin")` + `isSameOrigin`, `failedLoginCount`=0,
+     `lockedUntil`=null, audité). Les composants vont dans `src/components/admin/`, clés i18n sous `admin.*` (fr + en, test de parité).
+   - **D. À FAIRE** un admin ne peut pas se bannir, se supprimer ni se retirer son propre rôle (en plus de `LAST_ADMIN`, hook `before` de
+     `create-auth.ts`) ; audit de chaque action sans secret ; test de matrice anonyme/user/admin sur toutes les pages et endpoints.
+   - **E. À FAIRE** clôture : check + build + smoke curl (anonyme/user/admin), revue sécurité (accès, IDOR sur `[id]`, injection recherche, fuite de
+     données), HANDOFF, un commit par bloc, push, suivi CI.
+   - Futur : envoi du lien par e-mail quand domaine/SMTP existeront.
 5. **Projets** : `project` + `project_translation` (fr/en), page publique + gestion admin.
 6. **Mini-jeux** : `game`, `game_session`, `game_stat` (JSONB), page de sélection, JWT court (10 min) userId+gameId,
    `POST /api/v1/games/{slug}/stats` + clé d'API par jeu (hachée, révocable), plafonds de plausibilité, rate-limit. Revue sécurité dédiée.
@@ -58,6 +64,11 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
 8. **Production** : déploiement SSH/GHCR, migrations au démarrage (pas encore dans l'image), sauvegardes Postgres, durcissement VPS.
 
 ## Pièges connus (environnement de dev de l'agent)
+- Tests : chaque fichier lance une base PGlite + Argon2 ; `vitest.config.mts` borne `maxWorkers: 3` et allonge `hookTimeout` (sinon timeouts de
+  `beforeAll` en parallèle). Les tests d'`auth-env` passent par `createInvitedUser` etc. avec `env.auth` sans plugin `nextCookies`.
+- Route Handlers : `RouteContext<"/api/…/[id]/…">` est global (types générés par `next typegen`) ; `params` est une Promise.
+- Smoke test : un compte créé par invitation n'a pas de mot de passe connu ; pour tester `/api/welcome`, créer via `POST /api/admin/users` (cookie admin)
+  et lire `link` dans la réponse JSON (fragment `#token=`).
 - `NODE_ENV=production` est défini dans le shell : `npm install` ignore les devDependencies → toujours `npm install --include=dev`
   (les scripts de CI utilisent `npm ci --include=dev`).
 - Pas de daemon Docker ni de psql : tester la DB avec PGlite (`tests/helpers/auth-env.ts`) ou `npm run dev:db` (serveur PGlite sur un port).
