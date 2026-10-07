@@ -32,6 +32,9 @@ export const user = pgTable(
     // champs métier
     mustChangePassword: boolean("must_change_password").notNull().default(false),
     locale: text("locale").notNull().default("fr"),
+    // verrouillage temporaire anti brute-force (voir authz.ts)
+    failedLoginCount: integer("failed_login_count").notNull().default(0),
+    lockedUntil: timestamp("locked_until"),
   },
   (t) => [uniqueIndex("user_email_lower_idx").on(sql`lower(${t.email})`)],
 );

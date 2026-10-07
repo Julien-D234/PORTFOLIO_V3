@@ -2,10 +2,11 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { admin } from "better-auth/plugins";
-import { and, count, eq, like, ne } from "drizzle-orm";
+import { and, count, eq, like, ne, sql } from "drizzle-orm";
 import * as schema from "../db/schema";
 import type { Db } from "../db/types";
 import { writeAudit } from "./audit";
+import { isLocked, lockUntilFor } from "./authz";
 import { hashPassword, verifyPassword } from "./password";
 
 export interface AuthOptions {
@@ -31,6 +32,8 @@ const AUDITED = [
   "/change-password",
 ];
 
+const INVALID_CREDENTIALS = { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" };
+
 export function createAuth(db: Db, opts: AuthOptions) {
   /** Nombre d'admins actifs (non bannis), hors utilisateur `excludeId`. */
   async function otherActiveAdmins(excludeId: string) {
@@ -42,6 +45,12 @@ export function createAuth(db: Db, opts: AuthOptions) {
       );
     return row?.n ?? 0;
   }
+
+  const findByEmail = async (email: unknown) => {
+    if (typeof email !== "string") return undefined;
+    const [u] = await db.select().from(schema.user).where(sql`lower(${schema.user.email}) = ${email.trim().toLowerCase()}`);
+    return u;
+  };
 
   return betterAuth({
     secret: opts.secret,
@@ -107,6 +116,11 @@ export function createAuth(db: Db, opts: AuthOptions) {
         if (ctx.path === "/admin/impersonate-user") {
           throw new APIError("FORBIDDEN", { message: "Impersonation disabled" });
         }
+        // Compte verrouillé : même réponse qu'un mauvais mot de passe (pas d'énumération de comptes).
+        if (ctx.path === "/sign-in/email") {
+          const u = await findByEmail((ctx.body as { email?: unknown } | undefined)?.email);
+          if (u && isLocked(u)) throw new APIError("UNAUTHORIZED", INVALID_CREDENTIALS);
+        }
         // Le plugin admin ne applique pas minPasswordLength : on le fait ici.
         if (ctx.path === "/admin/create-user" || ctx.path === "/admin/set-user-password") {
           const b = (ctx.body ?? {}) as { password?: unknown; newPassword?: unknown };
@@ -131,6 +145,30 @@ export function createAuth(db: Db, opts: AuthOptions) {
       }),
 
       after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === "/sign-in/email") {
+          const ip = ctx.request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+          const u = await findByEmail((ctx.body as { email?: unknown } | undefined)?.email);
+          if (!u) return;
+          const returned = ctx.context.returned;
+          if (returned instanceof APIError) {
+            // Seuls les échecs d'identifiants comptent (pas les bans ni le rate-limit) ; un compte déjà verrouillé n'est pas prolongé.
+            if (returned.statusCode !== 401 || isLocked(u)) return;
+            const [row] = await db
+              .update(schema.user)
+              .set({ failedLoginCount: sql`${schema.user.failedLoginCount} + 1` })
+              .where(eq(schema.user.id, u.id))
+              .returning({ n: schema.user.failedLoginCount });
+            const until = lockUntilFor(row?.n ?? 0);
+            await writeAudit(db, { actorId: null, action: "login_failed", targetId: u.id, ip });
+            if (until) {
+              await db.update(schema.user).set({ lockedUntil: until }).where(eq(schema.user.id, u.id));
+              await writeAudit(db, { actorId: null, action: "account_locked", targetId: u.id, ip });
+            }
+          } else if (!(returned instanceof Error) && (u.failedLoginCount > 0 || u.lockedUntil)) {
+            await db.update(schema.user).set({ failedLoginCount: 0, lockedUntil: null }).where(eq(schema.user.id, u.id));
+          }
+          return;
+        }
         if (!AUDITED.includes(ctx.path)) return;
         const returned = ctx.context.returned;
         if (returned instanceof APIError || returned instanceof Error) return; // échec : rien à journaliser ici

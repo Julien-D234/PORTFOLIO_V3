@@ -36,3 +36,16 @@ export function authorize(
     return { ok: false, reason: "must-change-password" };
   return { ok: true, user };
 }
+
+/* ---- Verrouillage de compte (anti brute-force) ---- */
+export const MAX_FAILED_LOGINS = 10;
+export const LOCK_DURATION_MS = 15 * 60 * 1000;
+
+export function isLocked(user: { lockedUntil?: Date | null }, now = new Date()) {
+  return !!user.lockedUntil && user.lockedUntil > now;
+}
+
+/** Date de fin de verrou à poser si ce nombre d'échecs consécutifs est atteint, sinon null. */
+export function lockUntilFor(failedCount: number, now = new Date()): Date | null {
+  return failedCount >= MAX_FAILED_LOGINS ? new Date(now.getTime() + LOCK_DURATION_MS) : null;
+}
