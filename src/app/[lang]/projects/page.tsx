@@ -54,8 +54,8 @@ export default async function ProjectsPage({ params }: PageProps<"/[lang]/projec
         >
           <div>
             <p className="text-xs tracking-[0.3em] text-[#8b8b93] uppercase">{t.eyebrow}</p>
-            <h1 className="my-1.5 text-[clamp(44px,12vw,140px)] leading-none font-bold">{t.title}</h1>
-            <p className="mt-2 text-[#8b8b93]">{projects.length ? t.subtitle : t.empty}</p>
+            <h1 className="mb-[0.12em] text-[clamp(44px,12vw,140px)] leading-[1.15] font-bold">{t.title}</h1>
+            <p className="mt-4 text-[#8b8b93]">{projects.length ? t.subtitle : t.empty}</p>
           </div>
           {projects.length > 0 && (
             <p aria-hidden className="absolute inset-x-0 bottom-5 text-center text-sm text-[#8b8b93]">
@@ -92,7 +92,7 @@ export default async function ProjectsPage({ params }: PageProps<"/[lang]/projec
                   ))}
                 </ul>
               )}
-              <h2 id={`p-${p.slug}`} className="my-3 text-[clamp(30px,6vw,64px)] leading-[1.05] font-bold text-white">
+              <h2 id={`p-${p.slug}`} className="mt-3 mb-5 text-[clamp(30px,6vw,64px)] leading-[1.12] font-bold text-white">
                 {p.title}
               </h2>
               <p className="mb-5 text-[clamp(15px,2vw,20px)] text-[#d0d0d6] [@media(max-height:480px)]:hidden">
