@@ -19,6 +19,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
         <strong>{dict.admin.title}</strong>
         <Link href={`/${lang}/admin`} className="underline">{n.dashboard}</Link>
         <Link href={`/${lang}/admin/users`} className="underline">{n.users}</Link>
+        <Link href={`/${lang}/admin/projects`} className="underline">{n.projects}</Link>
         <Link href={`/${lang}/admin/audit`} className="underline">{n.audit}</Link>
         <span className="ml-auto"><SignOutButton label={dict.auth.signOut} lang={lang} /></span>
       </header>

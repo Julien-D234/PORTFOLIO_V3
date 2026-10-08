@@ -42,12 +42,15 @@
       "dashboard": "Tableau de bord",
       "users": "Utilisateurs",
       "audit": "Journal d'audit",
-      "back": "Retour"
+      "back": "Retour",
+      "projects": "Projets"
     },
     "dashboard": {
       "users": "Comptes",
       "usersCount": "{n} comptes",
-      "auditLink": "Dernières actions"
+      "auditLink": "Dernières actions",
+      "projects": "Projets",
+      "projectsCount": "{n} projets"
     },
     "users": {
       "title": "Utilisateurs",
@@ -210,6 +213,130 @@
         "selfAction": "Action impossible sur votre propre compte."
       },
       "self": "C'est votre propre compte : vous ne pouvez pas le bannir, le supprimer ni modifier votre rôle."
+    },
+    "projects": {
+      "title": "Projets",
+      "new": "Nouveau projet",
+      "empty": "Aucun projet.",
+      "total": "{n} projet(s)",
+      "untitled": "(sans titre)",
+      "edit": "Modifier",
+      "cols": {
+        "position": "Pos.",
+        "title": "Titre",
+        "tags": "Tags",
+        "status": "Statut",
+        "updated": "Modifié le"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publié"
+      },
+      "create": {
+        "title": "Nouveau projet",
+        "slug": "Identifiant d'URL (slug)",
+        "hint": "Minuscules, chiffres et tirets (ex. mon-projet). Visible dans l'adresse du projet.",
+        "submit": "Créer le brouillon",
+        "submitting": "Création…",
+        "errors": {
+          "validation": "Slug invalide : minuscules, chiffres et tirets uniquement, 80 caractères maximum.",
+          "slugTaken": "Ce slug est déjà utilisé.",
+          "rateLimited": "Trop de requêtes. Réessayez dans une minute.",
+          "forbidden": "Action interdite.",
+          "unauthenticated": "Session expirée : reconnectez-vous.",
+          "network": "Une erreur est survenue. Réessayez plus tard."
+        }
+      },
+      "editor": {
+        "back": "← Projets",
+        "viewPublic": "Voir la page publique",
+        "save": "Enregistrer",
+        "saving": "Enregistrement…",
+        "saved": "Enregistré.",
+        "unsaved": "Modifications non enregistrées.",
+        "publish": "Publier",
+        "unpublish": "Dépublier",
+        "publishHint": "Publier exige un titre et un résumé en français.",
+        "publishing": "Publication…",
+        "published": "Projet publié.",
+        "unpublished": "Projet dépublié (brouillon).",
+        "sections": {
+          "general": "Général",
+          "content": "Contenu",
+          "tags": "Tags",
+          "cover": "Image de la liste",
+          "gallery": "Galerie (page du projet)",
+          "danger": "Zone dangereuse"
+        },
+        "fields": {
+          "slug": "Slug",
+          "position": "Position",
+          "positionHint": "Ordre d'affichage (le plus petit en premier)",
+          "startedAt": "Date de début",
+          "repoUrl": "Lien du code source",
+          "liveUrl": "Lien du projet en ligne",
+          "urlHint": "https uniquement",
+          "title": "Titre",
+          "summary": "Résumé",
+          "summaryCount": "{n}/{max}",
+          "description": "Description",
+          "descriptionHint": "Texte brut, sans mise en forme.",
+          "coverAlt": "Texte alternatif de l'image de la liste",
+          "langFr": "Français",
+          "langEn": "English",
+          "enFallback": "Les champs laissés vides en anglais utilisent le français."
+        },
+        "tags": {
+          "placeholder": "Ajouter un tag",
+          "add": "Ajouter",
+          "remove": "Retirer le tag {name}",
+          "none": "Aucun tag."
+        },
+        "cover": {
+          "hint": "Grand format conseillé (1920 px de large ou plus). Recadrée au centre sur la page publique.",
+          "choose": "Choisir une image",
+          "replace": "Remplacer",
+          "remove": "Retirer",
+          "none": "Aucune image : un dégradé sera affiché.",
+          "alt": "Image de la liste"
+        },
+        "gallery": {
+          "hint": "Visible uniquement sur la page du projet. Glissez-déposez pour réordonner (ou utilisez les flèches).",
+          "add": "Ajouter des images",
+          "empty": "Aucune image dans la galerie.",
+          "imageN": "Image {n}",
+          "alt": "Texte alternatif ({lang})",
+          "caption": "Légende ({lang})",
+          "moveLeft": "Déplacer avant",
+          "moveRight": "Déplacer après",
+          "remove": "Retirer"
+        },
+        "upload": {
+          "uploading": "Envoi de l'image…"
+        },
+        "danger": {
+          "hint": "Suppression définitive du projet et de ses images. Pour confirmer, retapez le slug :",
+          "placeholder": "Slug du projet",
+          "submit": "Supprimer le projet",
+          "confirm": "Supprimer définitivement ce projet et ses images ?"
+        },
+        "errors": {
+          "validation": "Certains champs sont invalides (liens https, date, longueurs maximales).",
+          "slugTaken": "Ce slug est déjà utilisé par un autre projet.",
+          "mediaMissing": "Une image n'existe plus : retirez-la puis réessayez.",
+          "notPublishable": "Un titre et un résumé en français sont requis.",
+          "slugMismatch": "Le slug saisi ne correspond pas.",
+          "notFound": "Projet introuvable.",
+          "rateLimited": "Trop de requêtes. Réessayez dans une minute.",
+          "forbidden": "Action interdite.",
+          "unauthenticated": "Session expirée : reconnectez-vous.",
+          "network": "Une erreur est survenue. Réessayez plus tard.",
+          "tooLarge": "Image trop lourde (5 Mo maximum).",
+          "unsupportedType": "Format non accepté (JPEG, PNG ou WebP uniquement).",
+          "invalidImage": "Image illisible ou corrompue.",
+          "badDimensions": "Dimensions refusées (trop petite ou trop grande)."
+        }
+      }
     }
   },
   "welcome": {

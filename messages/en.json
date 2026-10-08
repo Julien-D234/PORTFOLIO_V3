@@ -42,12 +42,15 @@
       "dashboard": "Dashboard",
       "users": "Users",
       "audit": "Audit log",
-      "back": "Back"
+      "back": "Back",
+      "projects": "Projects"
     },
     "dashboard": {
       "users": "Accounts",
       "usersCount": "{n} accounts",
-      "auditLink": "Latest actions"
+      "auditLink": "Latest actions",
+      "projects": "Projects",
+      "projectsCount": "{n} projects"
     },
     "users": {
       "title": "Users",
@@ -210,6 +213,130 @@
         "selfAction": "Not possible on your own account."
       },
       "self": "This is your own account: you cannot ban it, delete it or change its role."
+    },
+    "projects": {
+      "title": "Projects",
+      "new": "New project",
+      "empty": "No projects.",
+      "total": "{n} project(s)",
+      "untitled": "(untitled)",
+      "edit": "Edit",
+      "cols": {
+        "position": "Pos.",
+        "title": "Title",
+        "tags": "Tags",
+        "status": "Status",
+        "updated": "Updated"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published"
+      },
+      "create": {
+        "title": "New project",
+        "slug": "URL identifier (slug)",
+        "hint": "Lowercase letters, digits and hyphens (e.g. my-project). Shown in the project's address.",
+        "submit": "Create draft",
+        "submitting": "Creating…",
+        "errors": {
+          "validation": "Invalid slug: lowercase letters, digits and hyphens only, 80 characters max.",
+          "slugTaken": "This slug is already in use.",
+          "rateLimited": "Too many requests. Try again in a minute.",
+          "forbidden": "Forbidden.",
+          "unauthenticated": "Session expired: please sign in again.",
+          "network": "Something went wrong. Please try again later."
+        }
+      },
+      "editor": {
+        "back": "← Projects",
+        "viewPublic": "View public page",
+        "save": "Save",
+        "saving": "Saving…",
+        "saved": "Saved.",
+        "unsaved": "Unsaved changes.",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "publishHint": "Publishing requires a French title and summary.",
+        "publishing": "Publishing…",
+        "published": "Project published.",
+        "unpublished": "Project unpublished (draft).",
+        "sections": {
+          "general": "General",
+          "content": "Content",
+          "tags": "Tags",
+          "cover": "List image",
+          "gallery": "Gallery (project page)",
+          "danger": "Danger zone"
+        },
+        "fields": {
+          "slug": "Slug",
+          "position": "Position",
+          "positionHint": "Display order (lowest first)",
+          "startedAt": "Start date",
+          "repoUrl": "Source code link",
+          "liveUrl": "Live project link",
+          "urlHint": "https only",
+          "title": "Title",
+          "summary": "Summary",
+          "summaryCount": "{n}/{max}",
+          "description": "Description",
+          "descriptionHint": "Plain text, no formatting.",
+          "coverAlt": "Alt text for the list image",
+          "langFr": "Français",
+          "langEn": "English",
+          "enFallback": "Fields left empty in English use the French text."
+        },
+        "tags": {
+          "placeholder": "Add a tag",
+          "add": "Add",
+          "remove": "Remove tag {name}",
+          "none": "No tags."
+        },
+        "cover": {
+          "hint": "Large format recommended (1920 px wide or more). Center-cropped on the public page.",
+          "choose": "Choose an image",
+          "replace": "Replace",
+          "remove": "Remove",
+          "none": "No image: a gradient will be shown.",
+          "alt": "List image"
+        },
+        "gallery": {
+          "hint": "Shown on the project page only. Drag and drop to reorder (or use the arrows).",
+          "add": "Add images",
+          "empty": "No images in the gallery.",
+          "imageN": "Image {n}",
+          "alt": "Alt text ({lang})",
+          "caption": "Caption ({lang})",
+          "moveLeft": "Move earlier",
+          "moveRight": "Move later",
+          "remove": "Remove"
+        },
+        "upload": {
+          "uploading": "Uploading image…"
+        },
+        "danger": {
+          "hint": "Permanently deletes the project and its images. To confirm, retype the slug:",
+          "placeholder": "Project slug",
+          "submit": "Delete project",
+          "confirm": "Permanently delete this project and its images?"
+        },
+        "errors": {
+          "validation": "Some fields are invalid (https links, date, maximum lengths).",
+          "slugTaken": "This slug is already used by another project.",
+          "mediaMissing": "An image no longer exists: remove it and try again.",
+          "notPublishable": "A French title and summary are required.",
+          "slugMismatch": "The slug you typed doesn't match.",
+          "notFound": "Project not found.",
+          "rateLimited": "Too many requests. Try again in a minute.",
+          "forbidden": "Forbidden.",
+          "unauthenticated": "Session expired: please sign in again.",
+          "network": "Something went wrong. Please try again later.",
+          "tooLarge": "Image too large (5 MB max).",
+          "unsupportedType": "Unsupported format (JPEG, PNG or WebP only).",
+          "invalidImage": "Unreadable or corrupted image.",
+          "badDimensions": "Dimensions rejected (too small or too large)."
+        }
+      }
     }
   },
   "welcome": {
