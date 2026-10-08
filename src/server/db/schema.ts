@@ -2,9 +2,12 @@ import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
+  date,
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -140,6 +143,103 @@ export const invitation = pgTable(
   (t) => [index("invitation_user_id_idx").on(t.userId)],
 );
 
+/* ------------------------------------------------------------------ */
+/* Projets (portfolio)                                                 */
+/* ------------------------------------------------------------------ */
+
+/** Fichier image uploadé (stocké sur disque hors public/, servi par /media/[id]). */
+export const mediaFile = pgTable("media_file", {
+  id: text("id").primaryKey(), // aléatoire, non devinable
+  mime: text("mime").notNull(), // toujours image/webp après recompression
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  bytes: integer("bytes").notNull(),
+  createdBy: text("created_by"), // pas de FK : trace conservée
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const project = pgTable(
+  "project",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull().unique(),
+    status: text("status").notNull().default("draft"), // draft | published
+    position: integer("position").notNull().default(0),
+    repoUrl: text("repo_url"),
+    liveUrl: text("live_url"),
+    startedAt: date("started_at", { mode: "string" }),
+    coverImageId: text("cover_image_id").references(() => mediaFile.id, { onDelete: "set null" }),
+    publishedAt: timestamp("published_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    check("project_status_check", sql`${t.status} in ('draft', 'published')`),
+    check("project_slug_check", sql`${t.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(${t.slug}) <= 80`),
+    index("project_status_position_idx").on(t.status, t.position),
+  ],
+);
+
+export const projectTranslation = pgTable(
+  "project_translation",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    lang: text("lang").notNull(),
+    title: text("title").notNull().default(""),
+    summary: text("summary").notNull().default(""),
+    description: text("description").notNull().default(""), // texte brut
+    coverAlt: text("cover_alt").notNull().default(""),
+  },
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.lang] }),
+    check("project_translation_summary_check", sql`char_length(${t.summary}) <= 200`),
+  ],
+);
+
+/** Galerie de la page détail (l'image de la liste est project.coverImageId). */
+export const projectImage = pgTable(
+  "project_image",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    fileId: text("file_id")
+      .notNull()
+      .references(() => mediaFile.id, { onDelete: "restrict" }),
+    position: integer("position").notNull().default(0),
+    altFr: text("alt_fr").notNull().default(""),
+    altEn: text("alt_en").notNull().default(""),
+    captionFr: text("caption_fr").notNull().default(""),
+    captionEn: text("caption_en").notNull().default(""),
+  },
+  (t) => [index("project_image_project_idx").on(t.projectId, t.position)],
+);
+
+export const tag = pgTable(
+  "tag",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+  },
+  (t) => [uniqueIndex("tag_name_lower_idx").on(sql`lower(${t.name})`)],
+);
+
+export const projectTag = pgTable(
+  "project_tag",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.tagId] }), index("project_tag_tag_idx").on(t.tagId)],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -159,4 +259,12 @@ export type DbSchema = {
   rateLimit: typeof rateLimit;
   auditLog: typeof auditLog;
   invitation: typeof invitation;
+  mediaFile: typeof mediaFile;
+  project: typeof project;
+  projectTranslation: typeof projectTranslation;
+  projectImage: typeof projectImage;
+  tag: typeof tag;
+  projectTag: typeof projectTag;
 };
+
+export type ProjectTranslationInsert = typeof projectTranslation.$inferInsert;

@@ -2,7 +2,7 @@
 
 Dernier état : étapes 1-4 terminées ; **application DÉPLOYÉE** sur VPS OVH (https://giant-rhetoric-94.fr). Voir section « Production » ci-dessous.
 Admin de prod créé par Julien (compte de test erroné supprimé) ; connexion testée OK. L'accueil `/fr` est volontairement vide (page noire en mode sombre = normal).
-Prochaine étape : **5 (Projets)** — proposer le plan à Julien et le faire valider avant de coder. Julien veut d'abord voir le rendu en ligne et le design des étapes 5 et 6 (maquettes possibles).
+Prochaine étape : **5 (Projets)**, plan validé, bloc A fait, **prochain = bloc B (médias)**. Maquettes : `/opt/data/work/maquettes/projets.html` (+ `CHARTES.md` : charte A retenue, B néon écartée).
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -75,7 +75,24 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
      Revue : pas d'IDOR (toutes les routes `[id]` derrière requireAdmin/requireApi, id en requête paramétrée) ; points connus non bloquants : IP lue dans
      `X-Forwarded-For` (OK seulement derrière Caddy), actions refusées non auditées.
    - Futur : envoi du lien par e-mail quand domaine/SMTP existeront.
-5. **Projets** : `project` + `project_translation` (fr/en), page publique + gestion admin.
+5. **Projets** (plan VALIDÉ par Julien ; **bloc A FAIT** : schéma + migration `0003_kind_warhawk.sql`, `src/server/projects/public.ts` (listPublishedProjects, getPublishedProject, isMediaPublic, isValidSlug, repli fr), `src/server/projects/admin-queries.ts`, `tests/projects-queries.test.ts` ; prochain = bloc B médias). Décisions de Julien :
+   - **Public** : une seule page `/[lang]/projects` (visiteur = connecté), IMMERSIVE : hero « Projets » puis un projet par écran (100 % largeur, `100dvh`),
+     scroll snap `mandatory` adouci (PAS de `scroll-snap-stop: always`, jugé « violent » ; repli possible sur `proximity`), image grand format en fond + voile sombre,
+     titre/résumé/tags/bouton, points de position, clavier, `prefers-reduced-motion`. Recadrage centré en V1 (images ≥ 1920 px). Pas de galerie sur la liste.
+   - **Détail** `/[lang]/projects/[slug]` : page classique, SANS image principale ; titre, liens, tags, description en **texte brut**, **galerie** (uniquement ici).
+   - **Admin** : liste simple (position, titre, tags, statut, date, Modifier) + une page unique création/édition (contenu fr/en, slug, liens https, date, tags, position, image de la liste, galerie
+     avec glisser-déposer + légendes fr/en facultatives, publier/dépublier, suppression en retapant le slug). Publication exige titre + résumé fr ; repli sur fr si en manque.
+   - **Images : upload sur le VPS**. **Tags : table séparée** réutilisable (filtre public prévu plus tard, pas en V1). Charte graphique **A** (voir `CHARTES.md`).
+   - **Modèle (migration 0003)** : `project` (slug, status draft/published, position, repo_url, live_url, started_at, cover_image_id), `project_translation` (project_id+lang, title, summary ≤ 200, description, cover_alt),
+     `project_image` (galerie : file_id, position, alt/caption fr/en), `media_file` (id aléatoire, mime, dimensions, bytes), `tag` + `project_tag`.
+   - **Upload sécurisé** : `POST /api/admin/media` (requireApi admin + isSameOrigin + rate-limit) ; JPEG/PNG/WebP vérifiés par octets magiques (jamais extension/MIME client ; SVG exclu) ; 5 Mo et dimensions max ;
+     recompression `sharp` en WebP (EXIF supprimé, 1920 px + miniature) ; stockage dans un volume Docker hors `public/` ; service par `GET /media/[id]` (seulement ce qui est en base, `nosniff`, cache immutable,
+     images de brouillons non servies) ; nettoyage disque à la suppression ; volume ajouté aux sauvegardes ; CSP `img-src 'self'` suffit.
+   - **Routes** : public `/projects`, `/projects/[slug]`, `/media/[id]` ; admin `/admin/projects`, `/new`, `/[id]` ; API `POST /api/admin/projects`, `PATCH|DELETE …/[id]`, `…/publish|unpublish`, `…/media`, `PUT …/gallery`.
+     Chaque route : requireApi/requireAdmin → isSameOrigin → readJson borné → Zod. URLs `https` seulement, aucun HTML brut. Audit `project.created|updated|published|unpublished|deleted`, `media.uploaded`.
+   - **Blocs** : A schéma+requêtes (tests brouillon jamais public, repli fr/en, tags) → B médias (tests avec vrais fichiers piégés) → C pages publiques (responsive mobile/tablette/desktop) → D admin → E smoke curl + revue + HANDOFF + CI + déploiement.
+   - **Points à surveiller** : dépendance `sharp` (binaire natif, vérifier dans l'image Docker/VPS) ; espace disque du VPS ; ajout du volume dans `docker-compose.prod.yml` sur le VPS = donner à Julien la liste précise des actions AVANT de les lancer.
+   - Hors périmètre : filtre par tags, design accueil/navigation globale, point d'intérêt réglable des images.
 6. **Mini-jeux** : `game`, `game_session`, `game_stat` (JSONB), page de sélection, JWT court (10 min) userId+gameId,
    `POST /api/v1/games/{slug}/stats` + clé d'API par jeu (hachée, révocable), plafonds de plausibilité, rate-limit. Revue sécurité dédiée.
 7. **Profil** : stats par jeu, changement mdp/langue.
