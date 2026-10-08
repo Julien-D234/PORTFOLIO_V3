@@ -227,5 +227,32 @@
       "rateLimited": "Trop de tentatives. Réessayez dans une minute.",
       "network": "Une erreur est survenue. Réessayez plus tard."
     }
+  },
+  "projects": {
+    "eyebrow": "Portfolio",
+    "title": "Projets",
+    "subtitle": "Une sélection de ce que j'ai construit.",
+    "scrollHint": "↓ défiler",
+    "view": "Voir le projet →",
+    "empty": "Aucun projet publié pour le moment.",
+    "home": "Accueil",
+    "otherLang": "EN",
+    "otherLangLabel": "English",
+    "positionLabel": "Aller à la section {n} sur {total}",
+    "heroDot": "Introduction",
+    "detail": {
+      "back": "← Projets",
+      "started": "Début : {date}",
+      "repo": "Code source",
+      "live": "Voir en ligne",
+      "gallery": "Galerie",
+      "openImage": "Ouvrir l'image en grand",
+      "noDescription": "Aucune description pour le moment.",
+      "externalHint": "(nouvel onglet)"
+    },
+    "meta": {
+      "title": "Projets",
+      "description": "Une sélection de projets."
+    }
   }
 }

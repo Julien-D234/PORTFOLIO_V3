@@ -26,3 +26,19 @@ describe("messages", () => {
   it("fr et en ont exactement les mêmes clés", () =>
     expect(keys(en).sort()).toEqual(keys(fr).sort()));
 });
+
+import { fmtMonth, safeHttpsUrl } from "@/lib/format";
+describe("format projets", () => {
+  it("fmtMonth", () => {
+    expect(fmtMonth("2026-10-08", "fr")).toBe("octobre 2026");
+    expect(fmtMonth("2026-10-08", "en")).toBe("October 2026");
+    expect(fmtMonth("2026-13-45", "fr")).toBeNull();
+    expect(fmtMonth(null, "fr")).toBeNull();
+    expect(fmtMonth("pas une date", "fr")).toBeNull();
+  });
+  it("safeHttpsUrl n'accepte que https", () => {
+    expect(safeHttpsUrl("https://github.com/x")).toBe("https://github.com/x");
+    for (const u of ["http://x.fr", "javascript:alert(1)", "data:text/html,x", "//x.fr", "", null, "not a url"])
+      expect(safeHttpsUrl(u)).toBeNull();
+  });
+});
