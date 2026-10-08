@@ -11,7 +11,7 @@ export default async function NewProjectPage({ params }: PageProps<"/[lang]/admi
   const t = (await getDictionary(lang)).admin.projects.create;
   return (
     <main className="flex max-w-xl flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{t.title}</h1>
+      <h1 className="text-3xl font-bold">{t.title}</h1>
       <NewProjectForm lang={lang} labels={t} />
     </main>
   );

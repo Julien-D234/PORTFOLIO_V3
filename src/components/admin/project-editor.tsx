@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS } from "@/lib/project-schema";
 import { fmt } from "@/lib/format";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { ui } from "./ui";
 
 export type EditorLabels = Dictionary["admin"]["projects"]["editor"];
 export interface EditorTranslation { title: string; summary: string; description: string; coverAlt: string }
@@ -37,11 +38,6 @@ async function apiError(res: Response): Promise<ErrKey> {
 const post = (url: string, body?: unknown) =>
   fetch(url, { method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify(body ?? {}) });
 
-const input = "w-full rounded border border-neutral-400 bg-transparent px-2 py-2 text-sm";
-const btn = "rounded border border-neutral-400 px-3 py-2 text-sm disabled:opacity-60";
-const danger = "rounded border border-red-600 px-3 py-2 text-sm text-red-600 disabled:opacity-60";
-const box = "flex flex-col gap-3 rounded border border-neutral-400 p-4";
-
 export function ProjectEditor({
   lang, projectId, status: initialStatus, initial, suggestions, labels: l, statusLabels,
 }: {
@@ -58,6 +54,7 @@ export function ProjectEditor({
   const [info, setInfo] = useState<string | null>(null);
   const [tagDraft, setTagDraft] = useState("");
   const [typedSlug, setTypedSlug] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const dirty = useMemo(() => JSON.stringify(doc) !== saved, [doc, saved]);
   const dirtyRef = useRef(false);
@@ -165,176 +162,212 @@ export function ProjectEditor({
   const imgSrc = (id: string, thumb = true) => `/media/${id}${thumb ? "?v=thumb" : ""}`;
   const disabled = busy !== null;
   const langName = (c: "fr" | "en") => (c === "fr" ? l.fields.langFr : l.fields.langEn);
+  const accept = "image/jpeg,image/png,image/webp";
+  const dropFiles = (e: React.DragEvent, handler: (f: FileList | null) => void) => {
+    if (e.dataTransfer.files.length === 0) return; // réordonnancement interne : laissé à la galerie
+    e.preventDefault();
+    handler(e.dataTransfer.files);
+  };
 
   return (
-    <main className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link href={`/${lang}/admin/projects`} className="text-sm underline">{l.back}</Link>
-        <h1 className="text-2xl font-semibold">{doc.translations.fr.title || doc.slug}</h1>
-        <span className="rounded border border-neutral-400 px-2 py-0.5 text-xs">{statusLabels[status]}</span>
-        {status === "published" && (
-          <Link href={`/${lang}/projects/${doc.slug}`} className="text-sm underline" target="_blank">{l.viewPublic}</Link>
-        )}
-        <span className="ml-auto flex flex-wrap items-center gap-2">
-          <button type="button" disabled={disabled || !dirty} onClick={save} className={btn}>{busy === "save" ? l.saving : l.save}</button>
-          <button type="button" disabled={disabled} onClick={togglePublish} className={btn}>
-            {busy === "publish" ? l.publishing : status === "published" ? l.unpublish : l.publish}
-          </button>
-        </span>
+    <main className="flex flex-col gap-5 pb-24">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Link href={`/${lang}/admin/projects`} className="text-sm text-[#8b8b93] hover:text-white hover:underline">{l.back}</Link>
+          <h1 className="mt-1.5 text-3xl font-bold">{fmt(l.editTitle, { title: doc.translations.fr.title || doc.slug })}</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={status === "published" ? ui.badgePublished : ui.badgeDraft}>{statusLabels[status]}</span>
+          {status === "published" && (
+            <Link href={`/${lang}/projects/${doc.slug}`} className="text-sm text-[#6d8cff] hover:underline" target="_blank">{l.viewPublic}</Link>
+          )}
+        </div>
       </div>
       <div aria-live="polite" className="min-h-5 text-sm">
-        {error && <p role="alert" className="text-red-600">{l.errors[error]}</p>}
+        {error && <p role="alert" className="text-[#ef5b5b]">{l.errors[error]}</p>}
         {!error && busy === "upload" && <p>{l.upload.uploading}</p>}
-        {!error && busy !== "upload" && dirty && <p>{l.unsaved}</p>}
-        {!error && !dirty && info && <p>{info}</p>}
-        {status !== "published" && <p className="opacity-70">{l.publishHint}</p>}
+        {!error && busy !== "upload" && dirty && <p className="text-[#e5a93c]">{l.unsaved}</p>}
+        {!error && !dirty && info && <p className="text-[#3ecf8e]">{info}</p>}
+        {status !== "published" && !error && !dirty && !info && <p className={ui.muted}>{l.publishHint}</p>}
       </div>
 
-      <section className={box} aria-labelledby="sec-general">
-        <h2 id="sec-general" className="text-lg font-semibold">{l.sections.general}</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm">{l.fields.slug}
-            <input value={doc.slug} maxLength={LIMITS.slug} onChange={(e) => set("slug", e.target.value.toLowerCase())} className={input} />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">{l.fields.position}
-            <input type="number" min={0} max={LIMITS.maxPosition} step={1} value={doc.position}
-              onChange={(e) => set("position", e.target.value === "" ? 0 : Math.trunc(Number(e.target.value)))} className={input} />
-            <span className="text-xs opacity-70">{l.fields.positionHint}</span>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">{l.fields.startedAt}
-            <input type="date" value={doc.startedAt} onChange={(e) => set("startedAt", e.target.value)} className={input} />
-          </label>
-          <span />
-          <label className="flex flex-col gap-1 text-sm">{l.fields.repoUrl}
-            <input type="url" inputMode="url" placeholder="https://" value={doc.repoUrl} maxLength={LIMITS.url} onChange={(e) => set("repoUrl", e.target.value)} className={input} />
-            <span className="text-xs opacity-70">{l.fields.urlHint}</span>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">{l.fields.liveUrl}
-            <input type="url" inputMode="url" placeholder="https://" value={doc.liveUrl} maxLength={LIMITS.url} onChange={(e) => set("liveUrl", e.target.value)} className={input} />
-            <span className="text-xs opacity-70">{l.fields.urlHint}</span>
-          </label>
-        </div>
-      </section>
-
-      <section className={box} aria-labelledby="sec-content">
-        <h2 id="sec-content" className="text-lg font-semibold">{l.sections.content}</h2>
-        <div role="tablist" className="flex gap-2">
+      <section className={ui.box} aria-labelledby="sec-content">
+        <h2 id="sec-content" className={ui.boxTitle}>{l.sections.content}</h2>
+        <div role="tablist" className="flex gap-1.5">
           {(["fr", "en"] as const).map((c) => (
             <button key={c} type="button" role="tab" aria-selected={tab === c} onClick={() => setTab(c)}
-              className={`rounded border px-3 py-1 text-sm ${tab === c ? "border-current font-semibold" : "border-neutral-400"}`}>{langName(c)}</button>
+              className={`rounded-md border px-2.5 py-0.5 text-[13px] ${tab === c ? "border-[#6d8cff] text-white" : "border-[#26262a] text-[#8b8b93]"}`}>{langName(c)}</button>
           ))}
         </div>
-        {tab === "en" && <p className="text-xs opacity-70">{l.fields.enFallback}</p>}
-        <label className="flex flex-col gap-1 text-sm">{l.fields.title}
-          <input value={tr.title} maxLength={LIMITS.title} lang={tab} onChange={(e) => setTr(tab, "title", e.target.value)} className={input} />
+        {tab === "en" && <p className="text-xs text-[#8b8b93]">{l.fields.enFallback}</p>}
+        <label className={ui.label}>{l.fields.title}
+          <input value={tr.title} maxLength={LIMITS.title} lang={tab} onChange={(e) => setTr(tab, "title", e.target.value)} className={ui.field} />
         </label>
-        <label className="flex flex-col gap-1 text-sm">{l.fields.summary}
-          <textarea rows={3} value={tr.summary} maxLength={LIMITS.summary} lang={tab} onChange={(e) => setTr(tab, "summary", e.target.value.replace(/\n/g, " "))} className={input} />
-          <span className="text-xs opacity-70">{fmt(l.fields.summaryCount, { n: tr.summary.length, max: LIMITS.summary })}</span>
+        <label className={ui.label}>{l.fields.summary}
+          <textarea rows={3} value={tr.summary} maxLength={LIMITS.summary} lang={tab} onChange={(e) => setTr(tab, "summary", e.target.value.replace(/\n/g, " "))} className={ui.field} />
+          <span className="text-xs">{l.fields.summaryHint} · {fmt(l.fields.summaryCount, { n: tr.summary.length, max: LIMITS.summary })}</span>
         </label>
-        <label className="flex flex-col gap-1 text-sm">{l.fields.description}
-          <textarea rows={10} value={tr.description} maxLength={LIMITS.description} lang={tab} onChange={(e) => setTr(tab, "description", e.target.value)} className={input} />
-          <span className="text-xs opacity-70">{l.fields.descriptionHint}</span>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">{l.fields.coverAlt}
-          <input value={tr.coverAlt} maxLength={LIMITS.alt} lang={tab} onChange={(e) => setTr(tab, "coverAlt", e.target.value)} className={input} />
+        <label className={ui.label}>{l.fields.description}
+          <textarea rows={10} value={tr.description} maxLength={LIMITS.description} lang={tab} onChange={(e) => setTr(tab, "description", e.target.value)} className={ui.field} />
+          <span className="text-xs">{l.fields.descriptionHint}</span>
         </label>
       </section>
 
-      <section className={box} aria-labelledby="sec-tags">
-        <h2 id="sec-tags" className="text-lg font-semibold">{l.sections.tags}</h2>
-        {doc.tags.length === 0 ? <p className="text-sm opacity-70">{l.tags.none}</p> : (
-          <ul className="flex flex-wrap gap-2">
+      <section className={ui.box} aria-labelledby="sec-general">
+        <h2 id="sec-general" className={ui.boxTitle}>{l.sections.general}</h2>
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <label className={ui.label}>{l.fields.slug}
+            <input value={doc.slug} maxLength={LIMITS.slug} onChange={(e) => set("slug", e.target.value.toLowerCase())} className={ui.field} />
+          </label>
+          <label className={ui.label}>{l.fields.startedAt}
+            <input type="date" value={doc.startedAt} onChange={(e) => set("startedAt", e.target.value)} className={ui.field} />
+          </label>
+          <label className={ui.label}>{l.fields.repoUrl}
+            <input type="url" inputMode="url" placeholder="https://" value={doc.repoUrl} maxLength={LIMITS.url} onChange={(e) => set("repoUrl", e.target.value)} className={ui.field} />
+            <span className="text-xs">{l.fields.urlHint}</span>
+          </label>
+          <label className={ui.label}>{l.fields.liveUrl}
+            <input type="url" inputMode="url" placeholder="https://" value={doc.liveUrl} maxLength={LIMITS.url} onChange={(e) => set("liveUrl", e.target.value)} className={ui.field} />
+            <span className="text-xs">{l.fields.urlHint}</span>
+          </label>
+        </div>
+        <div className={ui.label}>
+          <label htmlFor="tag-input">{l.fields.tagsLabel}</label>
+          <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-[#26262a] bg-[#141416] p-2">
             {doc.tags.map((t) => (
-              <li key={t} className="flex items-center gap-1 rounded-full border border-neutral-400 px-2.5 py-0.5 text-sm">
+              <span key={t} className={ui.tagActive}>
                 {t}
-                <button type="button" aria-label={fmt(l.tags.remove, { name: t })} onClick={() => set("tags", doc.tags.filter((x) => x !== t))}>×</button>
-              </li>
+                <button type="button" aria-label={fmt(l.tags.remove, { name: t })} className="ml-0.5 text-[#8b8b93] hover:text-white"
+                  onClick={() => set("tags", doc.tags.filter((x) => x !== t))}>×</button>
+              </span>
             ))}
-          </ul>
-        )}
-        <div className="flex gap-2">
-          <input list="tag-suggestions" value={tagDraft} maxLength={LIMITS.tag} placeholder={l.tags.placeholder} aria-label={l.tags.placeholder}
-            onChange={(e) => setTagDraft(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} className={input} />
-          <datalist id="tag-suggestions">{suggestions.map((s) => <option key={s} value={s} />)}</datalist>
-          <button type="button" onClick={addTag} className={btn}>{l.tags.add}</button>
+            <input id="tag-input" list="tag-suggestions" value={tagDraft} maxLength={LIMITS.tag} placeholder={l.tags.placeholder}
+              onChange={(e) => setTagDraft(e.target.value)} onBlur={addTag}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(); } }}
+              className="min-w-36 flex-1 border-0 bg-transparent px-1.5 py-0.5 text-sm text-[#ededee] outline-none placeholder:text-[#8b8b93]" />
+            <datalist id="tag-suggestions">{suggestions.map((x) => <option key={x} value={x} />)}</datalist>
+          </div>
+        </div>
+        <label className={ui.label}>{l.fields.position}
+          <input type="number" min={0} max={LIMITS.maxPosition} step={1} value={doc.position}
+            onChange={(e) => set("position", e.target.value === "" ? 0 : Math.trunc(Number(e.target.value)))} className={`${ui.field} max-w-[120px]`} />
+          <span className="text-xs">{l.fields.positionHint}</span>
+        </label>
+      </section>
+
+      <section className={ui.box} aria-labelledby="sec-cover">
+        <h2 id="sec-cover" className={ui.boxTitle}>{l.sections.cover}</h2>
+        <p className="text-xs text-[#8b8b93]">{l.cover.hint}</p>
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+          {doc.coverImageId ? (
+            <div className="flex flex-col gap-1.5 rounded-lg border border-[#26262a] bg-[#0f0f11] p-1.5 sm:col-span-2">
+              {/* eslint-disable-next-line @next/next/no-img-element -- aperçu admin */}
+              <img src={imgSrc(doc.coverImageId)} alt={l.cover.alt} className="aspect-[21/9] w-full rounded-md object-cover" />
+              <div className="flex items-center justify-between text-xs text-[#8b8b93]">
+                <label className="cursor-pointer hover:text-white">
+                  {l.cover.replace}
+                  <input type="file" accept={accept} className="sr-only" disabled={disabled}
+                    onChange={(e) => { void onCover(e.target.files); e.target.value = ""; }} />
+                </label>
+                <button type="button" disabled={disabled} className="hover:text-white" onClick={() => set("coverImageId", null)}>{l.cover.remove}</button>
+              </div>
+              {(["fr", "en"] as const).map((c) => (
+                <input key={c} value={doc.translations[c].coverAlt} maxLength={LIMITS.alt} lang={c}
+                  placeholder={fmt(l.cover.altField, { lang: c.toUpperCase() })} aria-label={fmt(l.cover.altField, { lang: c.toUpperCase() })}
+                  onChange={(e) => setTr(c, "coverAlt", e.target.value)} className={`${ui.field} !py-1 text-xs`} />
+              ))}
+            </div>
+          ) : (
+            <label className={`${ui.drop} aspect-[21/9] sm:col-span-2`}
+              onDragOver={(e) => e.preventDefault()} onDrop={(e) => dropFiles(e, onCover)}>
+              <span>{l.cover.none}<br />{l.cover.drop}</span>
+              <input type="file" accept={accept} className="sr-only" disabled={disabled}
+                onChange={(e) => { void onCover(e.target.files); e.target.value = ""; }} />
+            </label>
+          )}
         </div>
       </section>
 
-      <section className={box} aria-labelledby="sec-cover">
-        <h2 id="sec-cover" className="text-lg font-semibold">{l.sections.cover}</h2>
-        <p className="text-xs opacity-70">{l.cover.hint}</p>
-        {doc.coverImageId ? (
-          // eslint-disable-next-line @next/next/no-img-element -- aperçu admin
-          <img src={imgSrc(doc.coverImageId)} alt={l.cover.alt} className="aspect-[21/9] w-full max-w-xl rounded object-cover" />
-        ) : <p className="text-sm opacity-70">{l.cover.none}</p>}
-        <div className="flex flex-wrap gap-2">
-          <label className={`${btn} cursor-pointer`}>
-            {doc.coverImageId ? l.cover.replace : l.cover.choose}
-            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={disabled}
-              onChange={(e) => { void onCover(e.target.files); e.target.value = ""; }} />
-          </label>
-          {doc.coverImageId && <button type="button" disabled={disabled} className={btn} onClick={() => set("coverImageId", null)}>{l.cover.remove}</button>}
-        </div>
-      </section>
-
-      <section className={box} aria-labelledby="sec-gallery">
-        <h2 id="sec-gallery" className="text-lg font-semibold">{l.sections.gallery}</h2>
-        <p className="text-xs opacity-70">{l.gallery.hint}</p>
-        {doc.gallery.length === 0 ? <p className="text-sm opacity-70">{l.gallery.empty}</p> : (
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {doc.gallery.map((g, i) => (
-              <li key={g.fileId} draggable
-                onDragStart={() => setDragFrom(i)} onDragEnd={() => setDragFrom(null)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) move(dragFrom, i); setDragFrom(null); }}
-                className={`flex cursor-grab flex-col gap-2 rounded border border-neutral-400 p-2 ${dragFrom === i ? "opacity-50" : ""}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- aperçu admin */}
-                <img src={imgSrc(g.fileId)} alt={g.altFr || fmt(l.gallery.imageN, { n: i + 1 })} draggable={false} className="aspect-[4/3] w-full rounded object-cover" />
-                {(["fr", "en"] as const).map((c) => {
-                  const alt = c === "fr" ? "altFr" : "altEn";
-                  const cap = c === "fr" ? "captionFr" : "captionEn";
-                  return (
-                    <div key={c} className="flex flex-col gap-1">
-                      <input value={g[alt]} maxLength={LIMITS.alt} lang={c} placeholder={fmt(l.gallery.alt, { lang: c.toUpperCase() })}
+      <section className={ui.box} aria-labelledby="sec-gallery">
+        <h2 id="sec-gallery" className={ui.boxTitle}>{l.sections.gallery}</h2>
+        <p className="text-xs text-[#8b8b93]">{l.gallery.hint}</p>
+        <ul className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+          {doc.gallery.map((g, i) => (
+            <li key={g.fileId} draggable
+              onDragStart={() => setDragFrom(i)} onDragEnd={() => setDragFrom(null)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) move(dragFrom, i); setDragFrom(null); }}
+              className={`flex cursor-grab flex-col gap-1.5 rounded-lg border border-[#26262a] bg-[#0f0f11] p-1.5 ${dragFrom === i ? "opacity-50" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- aperçu admin */}
+              <img src={imgSrc(g.fileId)} alt={g.altFr || fmt(l.gallery.imageN, { n: i + 1 })} draggable={false} className="aspect-[4/3] w-full rounded-md object-cover" />
+              {(["fr", "en"] as const).map((c) => {
+                const cap = c === "fr" ? "captionFr" : "captionEn";
+                return (
+                  <input key={c} value={g[cap]} maxLength={LIMITS.caption} lang={c} placeholder={fmt(l.gallery.caption, { lang: c.toUpperCase() })}
+                    aria-label={`${fmt(l.gallery.imageN, { n: i + 1 })} — ${fmt(l.gallery.caption, { lang: c.toUpperCase() })}`}
+                    onChange={(e) => setGal(i, { [cap]: e.target.value })} className={`${ui.field} !py-1 text-xs`} />
+                );
+              })}
+              <details className="text-xs text-[#8b8b93]">
+                <summary className="cursor-pointer">{l.gallery.altSummary}</summary>
+                <div className="mt-1.5 grid gap-1.5">
+                  {(["fr", "en"] as const).map((c) => {
+                    const alt = c === "fr" ? "altFr" : "altEn";
+                    return (
+                      <input key={c} value={g[alt]} maxLength={LIMITS.alt} lang={c} placeholder={fmt(l.gallery.alt, { lang: c.toUpperCase() })}
                         aria-label={`${fmt(l.gallery.imageN, { n: i + 1 })} — ${fmt(l.gallery.alt, { lang: c.toUpperCase() })}`}
-                        onChange={(e) => setGal(i, { [alt]: e.target.value })} className={`${input} !py-1 text-xs`} />
-                      <input value={g[cap]} maxLength={LIMITS.caption} lang={c} placeholder={fmt(l.gallery.caption, { lang: c.toUpperCase() })}
-                        aria-label={`${fmt(l.gallery.imageN, { n: i + 1 })} — ${fmt(l.gallery.caption, { lang: c.toUpperCase() })}`}
-                        onChange={(e) => setGal(i, { [cap]: e.target.value })} className={`${input} !py-1 text-xs`} />
-                    </div>
-                  );
-                })}
-                <div className="flex justify-between text-xs">
-                  <span className="flex gap-1">
-                    <button type="button" disabled={i === 0} aria-label={l.gallery.moveLeft} onClick={() => move(i, i - 1)} className="rounded border border-neutral-400 px-2 py-1 disabled:opacity-40">←</button>
-                    <button type="button" disabled={i === doc.gallery.length - 1} aria-label={l.gallery.moveRight} onClick={() => move(i, i + 1)} className="rounded border border-neutral-400 px-2 py-1 disabled:opacity-40">→</button>
-                  </span>
-                  <button type="button" onClick={() => set("gallery", doc.gallery.filter((_, j) => j !== i))} className="underline">{l.gallery.remove}</button>
+                        onChange={(e) => setGal(i, { [alt]: e.target.value })} className={`${ui.field} !py-1 text-xs`} />
+                    );
+                  })}
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
-        {doc.gallery.length < LIMITS.gallery && (
-          <label className={`${btn} cursor-pointer self-start`}>
-            {l.gallery.add}
-            <input type="file" multiple accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={disabled}
-              onChange={(e) => { void onGallery(e.target.files); e.target.value = ""; }} />
-          </label>
-        )}
+              </details>
+              <div className="flex items-center justify-between text-xs text-[#8b8b93]">
+                <span className="flex items-center gap-1">
+                  <span aria-hidden>{l.gallery.move}</span>
+                  <button type="button" disabled={i === 0} aria-label={l.gallery.moveLeft} onClick={() => move(i, i - 1)} className="rounded border border-[#26262a] px-1.5 py-0.5 hover:text-white disabled:opacity-40">←</button>
+                  <button type="button" disabled={i === doc.gallery.length - 1} aria-label={l.gallery.moveRight} onClick={() => move(i, i + 1)} className="rounded border border-[#26262a] px-1.5 py-0.5 hover:text-white disabled:opacity-40">→</button>
+                </span>
+                <button type="button" onClick={() => set("gallery", doc.gallery.filter((_, j) => j !== i))} className="hover:text-[#ef5b5b]">{l.gallery.remove}</button>
+              </div>
+            </li>
+          ))}
+          {doc.gallery.length < LIMITS.gallery && (
+            <li className="contents">
+              <label className={`${ui.drop} aspect-[4/3]`} onDragOver={(e) => e.preventDefault()} onDrop={(e) => dropFiles(e, onGallery)}>
+                <span>{l.gallery.drop}</span>
+                <input type="file" multiple accept={accept} className="sr-only" disabled={disabled}
+                  onChange={(e) => { void onGallery(e.target.files); e.target.value = ""; }} />
+              </label>
+            </li>
+          )}
+        </ul>
+        {doc.gallery.length === 0 && <p className="text-xs text-[#8b8b93]">{l.gallery.empty}</p>}
       </section>
 
-      <section className={`${box} border-red-600`} aria-labelledby="sec-danger">
-        <h2 id="sec-danger" className="text-lg font-semibold text-red-600">{l.sections.danger}</h2>
-        <p className="text-sm">{l.danger.hint} <code className="break-all">{initial.slug}</code></p>
-        <div className="flex flex-wrap gap-2">
-          <input value={typedSlug} onChange={(e) => setTypedSlug(e.target.value)} placeholder={l.danger.placeholder} aria-label={l.danger.placeholder}
-            autoComplete="off" className={`${input} max-w-xs`} />
-          <button type="button" disabled={disabled || typedSlug !== initial.slug} onClick={remove} className={danger}>{l.danger.submit}</button>
+      {showDelete && (
+        <section className="grid gap-2.5 rounded-[10px] border border-[#ef5b5b] p-4" aria-labelledby="sec-danger">
+          <h2 id="sec-danger" className="text-lg font-semibold text-[#ef5b5b]">{l.sections.danger}</h2>
+          <p className="text-sm">{l.danger.hint} <code className="break-all">{initial.slug}</code></p>
+          <div className="flex flex-wrap gap-2">
+            <input value={typedSlug} onChange={(e) => setTypedSlug(e.target.value)} placeholder={l.danger.placeholder} aria-label={l.danger.placeholder}
+              autoComplete="off" className={`${ui.field} max-w-xs`} />
+            <button type="button" disabled={disabled || typedSlug !== initial.slug} onClick={remove} className={ui.btnDanger}>{l.danger.submit}</button>
+            <button type="button" onClick={() => { setShowDelete(false); setTypedSlug(""); }} className={ui.btnSecondary}>{l.danger.cancel}</button>
+          </div>
+        </section>
+      )}
+
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-[#26262a] bg-[#0a0a0b]/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-6 py-3">
+          <button type="button" disabled={disabled} onClick={() => setShowDelete((v) => !v)} className={ui.btnDanger}>{l.danger.submit}</button>
+          <div className="flex items-center gap-2">
+            <button type="button" disabled={disabled} onClick={togglePublish} className={ui.btnSecondary}>
+              {busy === "publish" ? l.publishing : status === "published" ? l.unpublish : l.publish}
+            </button>
+            <button type="button" disabled={disabled || !dirty} onClick={save} className={ui.btn}>{busy === "save" ? l.saving : l.save}</button>
+          </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

@@ -33,3 +33,9 @@ export function safeHttpsUrl(u: string | null | undefined): string | null {
     return null;
   }
 }
+
+/** Date seule (JJ/MM/AAAA selon la langue), en UTC. */
+export function fmtDay(d: Date | null | undefined, lang: string): string {
+  if (!d) return "—";
+  return new Intl.DateTimeFormat(lang, { dateStyle: "short", timeZone: "UTC" }).format(d);
+}

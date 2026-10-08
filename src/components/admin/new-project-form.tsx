@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LIMITS, SLUG_RE } from "@/lib/project-schema";
+import { ui } from "./ui";
 
 export interface NewProjectLabels {
   slug: string; hint: string; submit: string; submitting: string;
@@ -37,15 +38,15 @@ export function NewProjectForm({ lang, labels }: { lang: string; labels: NewProj
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">{labels.slug}
+      <label className={ui.label}>{labels.slug}
         <input value={slug} maxLength={LIMITS.slug} autoComplete="off" onChange={(e) => setSlug(e.target.value.toLowerCase())}
-          className="rounded border border-neutral-400 bg-transparent px-2 py-2" />
-        <span className="text-xs opacity-70">{labels.hint}</span>
+          className={ui.field} />
+        <span className="text-xs">{labels.hint}</span>
       </label>
-      <button type="submit" disabled={pending || !valid} className="self-start rounded border border-neutral-400 px-3 py-2 text-sm disabled:opacity-60">
+      <button type="submit" disabled={pending || !valid} className={`${ui.btn} self-start`}>
         {pending ? labels.submitting : labels.submit}
       </button>
-      <div aria-live="polite">{error && <p role="alert" className="text-sm text-red-600">{labels.errors[error]}</p>}</div>
+      <div aria-live="polite">{error && <p role="alert" className="text-sm text-[#ef5b5b]">{labels.errors[error]}</p>}</div>
     </form>
   );
 }

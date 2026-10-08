@@ -261,16 +261,16 @@
         "published": "Projet publié.",
         "unpublished": "Projet dépublié (brouillon).",
         "sections": {
-          "general": "Général",
+          "general": "Infos",
           "content": "Contenu",
           "tags": "Tags",
-          "cover": "Image de la liste",
-          "gallery": "Galerie (page du projet)",
+          "cover": "Image de la liste (grand format, plein écran sur /projects)",
+          "gallery": "Galerie (ordre = glisser-déposer)",
           "danger": "Zone dangereuse"
         },
         "fields": {
           "slug": "Slug",
-          "position": "Position",
+          "position": "Position dans la liste publique",
           "positionHint": "Ordre d'affichage (le plus petit en premier)",
           "startedAt": "Date de début",
           "repoUrl": "Lien du code source",
@@ -282,9 +282,11 @@
           "description": "Description",
           "descriptionHint": "Texte brut, sans mise en forme.",
           "coverAlt": "Texte alternatif de l'image de la liste",
-          "langFr": "Français",
+          "langFr": "Français (obligatoire)",
           "langEn": "English",
-          "enFallback": "Les champs laissés vides en anglais utilisent le français."
+          "enFallback": "Les champs laissés vides en anglais utilisent le français.",
+          "summaryHint": "Affiché dans la liste, 200 caractères max",
+          "tagsLabel": "Tags (réutilisables, serviront au filtre futur)"
         },
         "tags": {
           "placeholder": "Ajouter un tag",
@@ -298,7 +300,9 @@
           "replace": "Remplacer",
           "remove": "Retirer",
           "none": "Aucune image : un dégradé sera affiché.",
-          "alt": "Image de la liste"
+          "alt": "Image de la liste",
+          "drop": "JPEG / PNG / WebP · 5 Mo max · format conseillé 21:9 (cliquez ou déposez un fichier)",
+          "altField": "Texte alternatif ({lang})"
         },
         "gallery": {
           "hint": "Visible uniquement sur la page du projet. Glissez-déposez pour réordonner (ou utilisez les flèches).",
@@ -309,7 +313,10 @@
           "caption": "Légende ({lang})",
           "moveLeft": "Déplacer avant",
           "moveRight": "Déplacer après",
-          "remove": "Retirer"
+          "remove": "Retirer",
+          "drop": "+ Ajouter des images (plusieurs à la fois, cliquez ou déposez)",
+          "move": "⋮⋮ déplacer",
+          "altSummary": "Texte alternatif (accessibilité)"
         },
         "upload": {
           "uploading": "Envoi de l'image…"
@@ -318,7 +325,8 @@
           "hint": "Suppression définitive du projet et de ses images. Pour confirmer, retapez le slug :",
           "placeholder": "Slug du projet",
           "submit": "Supprimer le projet",
-          "confirm": "Supprimer définitivement ce projet et ses images ?"
+          "confirm": "Supprimer définitivement ce projet et ses images ?",
+          "cancel": "Annuler"
         },
         "errors": {
           "validation": "Certains champs sont invalides (liens https, date, longueurs maximales).",
@@ -335,7 +343,8 @@
           "unsupportedType": "Format non accepté (JPEG, PNG ou WebP uniquement).",
           "invalidImage": "Image illisible ou corrompue.",
           "badDimensions": "Dimensions refusées (trop petite ou trop grande)."
-        }
+        },
+        "editTitle": "Modifier : {title}"
       }
     }
   },

@@ -261,16 +261,16 @@
         "published": "Project published.",
         "unpublished": "Project unpublished (draft).",
         "sections": {
-          "general": "General",
+          "general": "Info",
           "content": "Content",
           "tags": "Tags",
-          "cover": "List image",
-          "gallery": "Gallery (project page)",
+          "cover": "List image (large format, full screen on /projects)",
+          "gallery": "Gallery (order = drag and drop)",
           "danger": "Danger zone"
         },
         "fields": {
           "slug": "Slug",
-          "position": "Position",
+          "position": "Position in the public list",
           "positionHint": "Display order (lowest first)",
           "startedAt": "Start date",
           "repoUrl": "Source code link",
@@ -282,9 +282,11 @@
           "description": "Description",
           "descriptionHint": "Plain text, no formatting.",
           "coverAlt": "Alt text for the list image",
-          "langFr": "Français",
+          "langFr": "Français (required)",
           "langEn": "English",
-          "enFallback": "Fields left empty in English use the French text."
+          "enFallback": "Fields left empty in English use the French text.",
+          "summaryHint": "Shown in the list, 200 characters max",
+          "tagsLabel": "Tags (reusable, for the future filter)"
         },
         "tags": {
           "placeholder": "Add a tag",
@@ -298,7 +300,9 @@
           "replace": "Replace",
           "remove": "Remove",
           "none": "No image: a gradient will be shown.",
-          "alt": "List image"
+          "alt": "List image",
+          "drop": "JPEG / PNG / WebP · 5 MB max · recommended 21:9 (click or drop a file)",
+          "altField": "Alt text ({lang})"
         },
         "gallery": {
           "hint": "Shown on the project page only. Drag and drop to reorder (or use the arrows).",
@@ -309,7 +313,10 @@
           "caption": "Caption ({lang})",
           "moveLeft": "Move earlier",
           "moveRight": "Move later",
-          "remove": "Remove"
+          "remove": "Remove",
+          "drop": "+ Add images (several at once, click or drop)",
+          "move": "⋮⋮ move",
+          "altSummary": "Alt text (accessibility)"
         },
         "upload": {
           "uploading": "Uploading image…"
@@ -318,7 +325,8 @@
           "hint": "Permanently deletes the project and its images. To confirm, retype the slug:",
           "placeholder": "Project slug",
           "submit": "Delete project",
-          "confirm": "Permanently delete this project and its images?"
+          "confirm": "Permanently delete this project and its images?",
+          "cancel": "Cancel"
         },
         "errors": {
           "validation": "Some fields are invalid (https links, date, maximum lengths).",
@@ -335,7 +343,8 @@
           "unsupportedType": "Unsupported format (JPEG, PNG or WebP only).",
           "invalidImage": "Unreadable or corrupted image.",
           "badDimensions": "Dimensions rejected (too small or too large)."
-        }
+        },
+        "editTitle": "Edit: {title}"
       }
     }
   },
