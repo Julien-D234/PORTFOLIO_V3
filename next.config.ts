@@ -13,7 +13,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
-  serverExternalPackages: ["@node-rs/argon2", "pg"],
+  serverExternalPackages: ["@node-rs/argon2", "pg", "sharp"],
   reactStrictMode: true,
   async headers() {
     // La CSP (avec nonce) est posée par src/proxy.ts.

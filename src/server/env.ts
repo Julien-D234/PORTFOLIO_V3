@@ -5,6 +5,8 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET: 32 caractères minimum"),
   BETTER_AUTH_URL: z.url(),
+  // Dossier des images uploadées (volume Docker en production, hors public/).
+  MEDIA_DIR: z.string().min(1).default("./.media"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

@@ -2,7 +2,7 @@
 
 Dernier état : étapes 1-4 terminées ; **application DÉPLOYÉE** sur VPS OVH (https://giant-rhetoric-94.fr). Voir section « Production » ci-dessous.
 Admin de prod créé par Julien (compte de test erroné supprimé) ; connexion testée OK. L'accueil `/fr` est volontairement vide (page noire en mode sombre = normal).
-Prochaine étape : **5 (Projets)**, plan validé, bloc A fait, **prochain = bloc B (médias)**. Maquettes : `/opt/data/work/maquettes/projets.html` (+ `CHARTES.md` : charte A retenue, B néon écartée).
+Prochaine étape : **5 (Projets)**, plan validé, blocs A et B faits, **prochain = bloc C (pages publiques)**. Maquettes : `/opt/data/work/maquettes/projets.html` (+ `CHARTES.md` : charte A retenue, B néon écartée).
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
 ## Objectif
@@ -75,7 +75,7 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
      Revue : pas d'IDOR (toutes les routes `[id]` derrière requireAdmin/requireApi, id en requête paramétrée) ; points connus non bloquants : IP lue dans
      `X-Forwarded-For` (OK seulement derrière Caddy), actions refusées non auditées.
    - Futur : envoi du lien par e-mail quand domaine/SMTP existeront.
-5. **Projets** (plan VALIDÉ par Julien ; **bloc A FAIT** : schéma + migration `0003_kind_warhawk.sql`, `src/server/projects/public.ts` (listPublishedProjects, getPublishedProject, isMediaPublic, isValidSlug, repli fr), `src/server/projects/admin-queries.ts`, `tests/projects-queries.test.ts` ; prochain = bloc B médias). Décisions de Julien :
+5. **Projets** (plan VALIDÉ par Julien ; **bloc A FAIT** : schéma + migration `0003_kind_warhawk.sql`, `src/server/projects/public.ts` (listPublishedProjects, getPublishedProject, isMediaPublic, isValidSlug, repli fr), `src/server/projects/admin-queries.ts`, `tests/projects-queries.test.ts` ; **bloc B FAIT** : `src/server/media/{image,store,body,service,index}.ts`, `POST /api/admin/media` (corps brut, 5 Mo, octets magiques, sharp → WebP 1920 + miniature 480, EXIF supprimé, bombes de pixels refusées), `GET /media/[id]?v=thumb` (public si projet publié, sinon admin, sinon 404), `MEDIA_DIR` (défaut `./.media`, `/data/media` en Docker + volume `media`), `tests/media.test.ts` ; `/media/` exclu du matcher de `proxy.ts` ; prochain = bloc C pages publiques ; reste à faire en E : volume média dans `docker/backup.sh` et sur le VPS (liste d'actions à valider avant). Décisions de Julien :
    - **Public** : une seule page `/[lang]/projects` (visiteur = connecté), IMMERSIVE : hero « Projets » puis un projet par écran (100 % largeur, `100dvh`),
      scroll snap `mandatory` adouci (PAS de `scroll-snap-stop: always`, jugé « violent » ; repli possible sur `proximity`), image grand format en fond + voile sombre,
      titre/résumé/tags/bouton, points de position, clavier, `prefers-reduced-motion`. Recadrage centré en V1 (images ≥ 1920 px). Pas de galerie sur la liste.

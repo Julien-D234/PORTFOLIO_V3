@@ -12,6 +12,8 @@ services:
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     tmpfs: ["/tmp", "/app/.next/cache"]
+    volumes:
+      - media:/data/media
     depends_on:
       db:
         condition: service_healthy
@@ -53,3 +55,4 @@ services:
 
 volumes:
   pgdata:
+  media:

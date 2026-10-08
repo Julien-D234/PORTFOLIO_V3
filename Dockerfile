@@ -24,6 +24,9 @@ RUN addgroup -S app && adduser -S app -G app
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
 COPY --from=build --chown=app:app /app/public ./public
+# Volume des images uploadées : créé ici pour que le volume Docker hérite du bon propriétaire.
+RUN mkdir -p /data/media && chown app:app /data/media
+ENV MEDIA_DIR=/data/media
 USER app
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=15s \
