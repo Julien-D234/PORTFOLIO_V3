@@ -1,6 +1,7 @@
 # HANDOFF : état du projet PORTFOLIO_V3
 
 Dernier état : étapes 1-4 terminées ; **application DÉPLOYÉE** sur VPS OVH (https://giant-rhetoric-94.fr). Voir section « Production » ci-dessous.
+Admin de prod créé par Julien (compte de test erroné supprimé) ; connexion testée OK. L'accueil `/fr` est volontairement vide (page noire en mode sombre = normal).
 Prochaine étape : **5 (Projets)** — proposer le plan à Julien et le faire valider avant de coder. Julien veut d'abord voir le rendu en ligne et le design des étapes 5 et 6 (maquettes possibles).
 Propriétaire : Julien (GitHub `Julien-D234`), dépôt `Julien-D234/PORTFOLIO_V3` (public). Langue de travail : français.
 
@@ -88,6 +89,8 @@ un admin et levé après `/change-password`, audit_log, rate-limit en base (5 co
   `sudo docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d --build` (build ~5 min). `deploy.yml` (GHCR) reste désactivé.
 - Migrations au démarrage : service compose `migrate` (stage Dockerfile `tools`), `app` attend `service_completed_successfully`.
 - Premier admin : `ssh -t ubuntu@IP 'cd /srv/portfolio && sudo docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml run --rm migrate npm run create-admin -- --email X --name Y'` (mdp saisi masqué).
+- Navigation : aucun lien depuis l'accueil vers login/admin (accès par URL `/fr/login`, `/fr/admin`). À traiter avec le design.
+- Dependabot actif (PR/CI « docker in / for node » sur le dépôt) : vérifier avant de merger, ne pas mettre à jour Node/Postgres sans test.
 - Sauvegardes : `docker/backup.sh` (pg_dump gz, 14 j) via cron root 03:00 vers `/srv/backups`. PAS de copie hors serveur pour l'instant.
 
 ## Pièges connus (environnement de dev de l'agent)
